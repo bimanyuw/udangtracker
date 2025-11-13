@@ -1,0 +1,126 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+
+{% block title %}Detail {{ lot.lot_id }} | Udang Tracker{% endblock %}
+
+{% block extra_head %}
+    <script src="{% static 'tracker/js/lot_graph.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'tracker:lot_list' %}" class="back-link">
+        <span>&larr;</span>
+        <span>Kembali ke daftar lot</span>
+    </a>
+
+    <h2 class="page-title">Detail Lot: {{ lot.lot_id }}</h2>
+
+    <div class="card">
+        <h3>Informasi Dasar</h3>
+        <p>
+            Dibuat oleh:
+            <strong>{{ lot.creator.username|default:"-" }}</strong><br>
+            Status:
+            {% if lot.status == "OK" %}
+                <span class="badge badge-ok">{{ lot.get_status_display }}</span>
+            {% elif lot.status == "HOLD" %}
+                <span class="badge badge-hold">{{ lot.get_status_display }}</span>
+            {% elif lot.status == "INVESTIGATE" %}
+                <span class="badge badge-investigate">{{ lot.get_status_display }}</span>
+            {% endif %}
+            <br>
+            Dibuat pada: {{ lot.created_at }}
+        </p>
+        <p>
+            🔍 <a href="{% url 'tracker:suspect_nodes' %}">Lihat dashboard node tersangka</a>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Paspor Digital (QR Code)</h3>
+        <p>Scan QR ini untuk membuka halaman detail lot ini:</p>
+        <div class="qr-wrapper">
+            <img src="{% url 'tracker:lot_qr' lot.lot_id %}"
+                 alt="QR Code Lot {{ lot.lot_id }}">
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Visualisasi Jalur Lot</h3>
+        <p>Diagram sederhana node-node yang dilalui lot ini di sepanjang rantai pasok.</p>
+        <div id="graph-container"
+             data-trace-url="{% url 'tracker:lot_trace_json' lot.lot_id %}"></div>
+    </div>
+
+    <div class="card">
+        <h3>Riwayat Pergerakan Lot</h3>
+        {% if movements %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Dari</th>
+                        <th>Ke</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mv in movements %}
+                        <tr>
+                            <td>{{ mv.timestamp }}</td>
+                            <td>{{ mv.node_from.name|default:"-" }}</td>
+                            <td>{{ mv.node_to.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Belum ada data pergerakan lot ini.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Hasil Uji Kualitas (QC)</h3>
+        {% if qc_results %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Node</th>
+                        <th>Parameter</th>
+                        <th>Nilai</th>
+                        <th>Batas</th>
+                        <th>Satuan</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qc in qc_results %}
+                        <tr>
+                            <td>{{ qc.timestamp }}</td>
+                            <td>{{ qc.node_at.name }}</td>
+                            <td>{{ qc.metric_name }}</td>
+                            <td>{{ qc.metric_value }}</td>
+                            <td>
+                                {% if qc.limit_value is not None %}
+                                    {{ qc.limit_value }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ qc.unit }}</td>
+                            <td>
+                                {% if qc.is_contaminated %}
+                                    <span class="badge badge-investigate">Di atas batas</span>
+                                {% else %}
+                                    <span class="badge badge-ok">Aman</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Belum ada data QC untuk lot ini.</p>
+        {% endif %}
+    </div>
+{% endblock %}

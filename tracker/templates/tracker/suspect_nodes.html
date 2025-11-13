@@ -1,0 +1,98 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Analisis Node Tersangka | Udang Tracker{% endblock %}
+
+{% block extra_head %}
+<style>
+    .badge-high { background: #f8d7da; color: #721c24; }
+    .badge-medium { background: #fff3cd; color: #856404; }
+    .badge-low { background: #d1ecf1; color: #0c5460; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'tracker:lot_list' %}">&larr; Kembali ke daftar lot</a>
+
+    <h1>Analisis Node Tersangka</h1>
+    <p>
+        Halaman ini menampilkan node yang paling sering muncul
+        dalam <strong>lot bermasalah</strong> (status HOLD / Investigasi).
+    </p>
+
+    <h2>Ringkasan Lot Bermasalah</h2>
+    {% if bad_lots %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Lot ID</th>
+                    <th>Status</th>
+                    <th>Dibuat pada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lot in bad_lots %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'tracker:lot_detail' lot.lot_id %}">
+                                {{ lot.lot_id }}
+                            </a>
+                        </td>
+                        <td>{{ lot.get_status_display }}</td>
+                        <td>{{ lot.created_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Saat ini belum ada lot bermasalah (status HOLD / Investigasi).</p>
+    {% endif %}
+
+    <h2>Node yang Paling Sering Terlibat</h2>
+    {% if suspects %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Node</th>
+                    <th>Tipe</th>
+                    <th>Jumlah Keterlibatan</th>
+                    <th>Terlibat di Berapa Lot</th>
+                    <th>Daftar Lot</th>
+                    <th>Level Risiko</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in suspects %}
+                    <tr>
+                        <td>{{ item.node.name }}</td>
+                        <td>{{ item.node.get_type_display }}</td>
+                        <td>{{ item.count }}</td>
+                        <td>{{ item.lots_count }}</td>
+                        <td>
+                            {% for lid in item.lots %}
+                                <a href="{% url 'tracker:lot_detail' lid %}">{{ lid }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if forloop.first %}
+                                <span class="badge badge-high">Tinggi</span>
+                            {% elif forloop.counter <= 3 %}
+                                <span class="badge badge-medium">Sedang</span>
+                            {% else %}
+                                <span class="badge badge-low">Rendah</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Belum ada node yang dapat dianalisis karena tidak ada pergerakan di lot bermasalah.</p>
+    {% endif %}
+
+    <p>
+        Lihat juga:
+        <a href="{% url 'tracker:contaminated_lots' %}">
+            daftar lot terkontaminasi
+        </a>
+    </p>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Daftar Lot Terkontaminasi | Udang Tracker{% endblock %}
+
+{% block content %}
+    <a href="{% url 'tracker:lot_list' %}">&larr; Kembali ke daftar lot</a>
+
+    <h1>Daftar Lot Terkontaminasi</h1>
+    <p>Lot-lot berikut memiliki setidaknya satu hasil QC yang melewati batas.</p>
+
+    {% if lots %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Lot ID</th>
+                    <th>Status Lot</th>
+                    <th>Dibuat Pada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lot in lots %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'tracker:lot_detail' lot.lot_id %}">
+                                {{ lot.lot_id }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge-investigate">
+                                {{ lot.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ lot.created_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Belum ada lot yang terdeteksi melewati batas QC.</p>
+    {% endif %}
+{% endblock %}

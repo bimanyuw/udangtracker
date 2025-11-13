@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Udang Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'tracker/css/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-brand">
+                Udang Tracker
+            </div>
+            <nav class="navbar-links">
+                {% url 'tracker:lot_list' as lot_list_url %}
+                {% url 'tracker:contaminated_lots' as contaminated_url %}
+                {% url 'tracker:suspect_nodes' as suspects_url %}
+
+                <a href="{{ lot_list_url }}"
+                   class="nav-link {% if request.path == lot_list_url or request.path|slice:':6' == '/lots/' %}nav-link-active{% endif %}">
+                    Daftar Lot
+                </a>
+
+                <a href="{{ contaminated_url }}"
+                   class="nav-link {% if request.path == contaminated_url %}nav-link-active{% endif %}">
+                    Lot Terkontaminasi
+                </a>
+
+                <a href="{{ suspects_url }}"
+                   class="nav-link {% if request.path == suspects_url %}nav-link-active{% endif %}">
+                    Node Tersangka
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
