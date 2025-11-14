@@ -1,126 +1,154 @@
 {% extends "tracker/base.html" %}
-{% load static %}
 
-{% block title %}Detail {{ lot.lot_id }} | Udang Tracker{% endblock %}
-
-{% block extra_head %}
-    <script src="{% static 'tracker/js/lot_graph.js' %}"></script>
-{% endblock %}
+{% block title %}{{ lot.lot_id }} - Udang Tracker{% endblock %}
 
 {% block content %}
+<div class="page-container">
+
     <a href="{% url 'tracker:lot_list' %}" class="back-link">
-        <span>&larr;</span>
-        <span>Kembali ke daftar lot</span>
+        ← Kembali ke daftar lot
     </a>
 
-    <h2 class="page-title">Detail Lot: {{ lot.lot_id }}</h2>
-
-    <div class="card">
-        <h3>Informasi Dasar</h3>
-        <p>
-            Dibuat oleh:
-            <strong>{{ lot.creator.username|default:"-" }}</strong><br>
-            Status:
-            {% if lot.status == "OK" %}
-                <span class="badge badge-ok">{{ lot.get_status_display }}</span>
-            {% elif lot.status == "HOLD" %}
-                <span class="badge badge-hold">{{ lot.get_status_display }}</span>
-            {% elif lot.status == "INVESTIGATE" %}
-                <span class="badge badge-investigate">{{ lot.get_status_display }}</span>
-            {% endif %}
-            <br>
-            Dibuat pada: {{ lot.created_at }}
+    <header class="page-header">
+        <h1 class="page-title">{{ lot.lot_id }}</h1>
+        <p class="page-subtitle">
+            Detail lengkap informasi lot dan riwayat perjalanan.
         </p>
-        <p>
-            🔍 <a href="{% url 'tracker:suspect_nodes' %}">Lihat dashboard node tersangka</a>
-        </p>
-    </div>
+    </header>
 
-    <div class="card">
-        <h3>Paspor Digital (QR Code)</h3>
-        <p>Scan QR ini untuk membuka halaman detail lot ini:</p>
-        <div class="qr-wrapper">
-            <img src="{% url 'tracker:lot_qr' lot.lot_id %}"
-                 alt="QR Code Lot {{ lot.lot_id }}">
+    <!-- ================= INFORMASI DASAR ================= -->
+    <section class="card">
+        <div class="basic-info-header">
+            <div>
+                <h2 class="card-title">Informasi Dasar</h2>
+            </div>
+            <div class="basic-info-right">
+                <div class="lot-code-large">{{ lot.lot_id }}</div>
+                <a href="{% url 'tracker:suspect_nodes' %}" class="link-inline">
+                    🔍 Lihat dashboard node tersangka
+                </a>
+            </div>
         </div>
-    </div>
 
-    <div class="card">
-        <h3>Visualisasi Jalur Lot</h3>
-        <p>Diagram sederhana node-node yang dilalui lot ini di sepanjang rantai pasok.</p>
-        <div id="graph-container"
-             data-trace-url="{% url 'tracker:lot_trace_json' lot.lot_id %}"></div>
-    </div>
+        <dl class="info-grid">
+            <div class="info-item">
+                <dt>Lot ID:</dt>
+                <dd>{{ lot.lot_id }}</dd>
+            </div>
 
-    <div class="card">
-        <h3>Riwayat Pergerakan Lot</h3>
+            <div class="info-item">
+                <dt>Dibuat oleh:</dt>
+                <dd>{{ lot.creator.username|default:"-" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Status:</dt>
+                <dd>
+                    {% if lot.status == "OK" %}
+                        <span class="badge badge-ok">Aman</span>
+                    {% elif lot.status == "HOLD" %}
+                        <span class="badge badge-hold">Ditahan</span>
+                    {% elif lot.status == "INVESTIGATE" %}
+                        <span class="badge badge-investigate">Investigasi</span>
+                    {% else %}
+                        {{ lot.status }}
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Tanggal dibuat:</dt>
+                <dd>{{ lot.created_at|date:"Y-m-d H:i" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Jenis kontaminasi:</dt>
+                <dd>
+                    {% if lot.jenis_kontaminasi %}
+                        <span class="text-danger">{{ lot.jenis_kontaminasi }}</span>
+                    {% else %}
+                        <span class="text-muted">Tidak ada (lot aman)</span>
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <!-- ================= QR CODE ================= -->
+    <section class="card">
+        <h2 class="card-title">Paspor Digital (QR Code)</h2>
+        <p class="card-subtitle">
+            Scan QR code ini untuk melihat informasi lengkap lot di aplikasi mobile.
+        </p>
+        <div class="qr-wrapper">
+            <!-- placeholder QR sederhana -->
+            <div class="qr-placeholder">
+                <div class="qr-dot-row">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="qr-dot-row">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="qr-dot-row">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="qr-dot-row">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= VISUALISASI JALUR LOT ================= -->
+    <section class="card">
+        <h2 class="card-title">Visualisasi Jalur Lot</h2>
+        <p class="card-subtitle">
+            Diagram node-node yang dilalui lot ini di sepanjang rantai pasok.
+        </p>
+
+        {% if path_nodes %}
+            <div class="lot-path">
+                {% for item in path_nodes %}
+                    <div class="lot-node">
+                        <div class="lot-node-name">{{ item.node.name }}</div>
+                        <div class="lot-node-type">{{ item.node.type|title }}</div>
+                    </div>
+                    {% if not forloop.last %}
+                        <div class="lot-path-arrow">→</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-state">Belum ada data pergerakan untuk lot ini.</p>
+        {% endif %}
+    </section>
+
+    <!-- ================= RIWAYAT PERGERAKAN ================= -->
+    <section class="card">
+        <h2 class="card-title">Riwayat Pergerakan Lot</h2>
+
         {% if movements %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Dari</th>
-                        <th>Ke</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for mv in movements %}
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>{{ mv.timestamp }}</td>
-                            <td>{{ mv.node_from.name|default:"-" }}</td>
-                            <td>{{ mv.node_to.name }}</td>
+                            <th>Waktu</th>
+                            <th>Node</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for m in movements %}
+                        <tr>
+                            <td>{{ m.timestamp|date:"Y-m-d H:i" }}</td>
+                            <td>{{ m.node.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <p>Belum ada data pergerakan lot ini.</p>
+            <p class="empty-state">Belum ada riwayat pergerakan lot.</p>
         {% endif %}
-    </div>
+    </section>
 
-    <div class="card">
-        <h3>Hasil Uji Kualitas (QC)</h3>
-        {% if qc_results %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Node</th>
-                        <th>Parameter</th>
-                        <th>Nilai</th>
-                        <th>Batas</th>
-                        <th>Satuan</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for qc in qc_results %}
-                        <tr>
-                            <td>{{ qc.timestamp }}</td>
-                            <td>{{ qc.node_at.name }}</td>
-                            <td>{{ qc.metric_name }}</td>
-                            <td>{{ qc.metric_value }}</td>
-                            <td>
-                                {% if qc.limit_value is not None %}
-                                    {{ qc.limit_value }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>{{ qc.unit }}</td>
-                            <td>
-                                {% if qc.is_contaminated %}
-                                    <span class="badge badge-investigate">Di atas batas</span>
-                                {% else %}
-                                    <span class="badge badge-ok">Aman</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Belum ada data QC untuk lot ini.</p>
-        {% endif %}
-    </div>
 {% endblock %}

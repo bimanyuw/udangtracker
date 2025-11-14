@@ -1,207 +1,559 @@
-/* === Global layout === */
-* {
+/* ========= GLOBAL ========= */
+
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    background: #f3f4f6;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #f3f4f6;
     color: #111827;
 }
 
-main {
-    max-width: 1100px;
-    margin: 24px auto 32px auto;
-    padding: 0 16px;
+/* Kalau base.html pakai .app-shell, ini bantu full height */
+.app-shell {
+    min-height: 100vh;
+    background-color: #f3f4f6;
 }
 
-/* === Navbar rapi sejajar konten === */
+/* ========= NAVBAR ========= */
 
-header {
-    background: #0c4a6e;
-    color: #e0f2fe;
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
-}
-
-/* bungkus isi header supaya sejajar dengan main */
 .navbar {
+    background-color: #003b5c;
+    color: #ffffff;
+    padding: 12px 24px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+}
+
+.navbar-inner {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 10px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
 }
 
-.navbar-brand {
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-}
-
-.navbar-links {
+.nav-brand {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
+    flex-direction: column;
+}
+
+.nav-brand-title {
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.nav-brand-subtitle {
+    font-size: 12px;
+    color: #e5f4ff;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
 }
 
 .nav-link {
-    padding: 6px 10px;
-    border-radius: 999px;
     text-decoration: none;
-    color: #e0f2fe;
-    transition: background 0.15s ease, color 0.15s ease;
-    white-space: nowrap;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    color: #e5f4ff;
+    transition: background-color 0.15s ease;
 }
 
 .nav-link:hover {
-    background: rgba(15, 23, 42, 0.35);
+    background-color: rgba(255, 255, 255, 0.12);
 }
 
 .nav-link-active {
-    background: #e0f2fe;
-    color: #0c4a6e;
-    font-weight: 600;
+    background-color: #22a2f2;
+    color: #ffffff;
 }
 
-main {
-    padding: 24px;
+/* ========= LAYOUT HALAMAN ========= */
+
+.page-container {
+    max-width: 1100px;
+    margin: 32px auto 40px auto;
+    padding: 0 24px;
 }
 
-/* === Card & layout helpers === */
+.page-header {
+    margin-bottom: 24px;
+}
 
 .page-title {
-    margin-top: 0;
-    margin-bottom: 12px;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
 }
 
-.card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+.page-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
 }
 
-.card h2 {
-    margin-top: 0;
-}
-
-/* === Table styling === */
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-}
-
-.table th,
-.table td {
-    border: 1px solid #e5e7eb;
-    padding: 8px;
-    font-size: 0.95rem;
-}
-
-.table th {
-    background: #f9fafb;
-    text-align: left;
-}
-
-/* === Badges === */
-
-.badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.badge-ok {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.badge-hold {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.badge-investigate {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-/* === Links & buttons === */
-
-a {
-    color: #0c4a6e;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
+/* Link kecil (mis: kembali) */
+.link-back,
 .back-link {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.9rem;
+    font-size: 14px;
+    color: #4b5563;
+    text-decoration: none;
     margin-bottom: 12px;
 }
 
-/* === QR section === */
+.link-back:hover,
+.back-link:hover {
+    color: #111827;
+    text-decoration: underline;
+}
+
+/* Link inline */
+.link-inline {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.link-inline:hover {
+    text-decoration: underline;
+}
+
+/* ========= CARD ========= */
+
+.card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+}
+
+.card-subtitle {
+    margin: 0 0 16px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ========= LIST HEADER + SEARCH & FILTER ========= */
+
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.list-header .card-title {
+    margin: 0;
+}
+
+/* container search + filter */
+.list-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+    .list-toolbar {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+/* SEARCH */
+.search-wrapper {
+    position: relative;
+    width: 260px;
+}
+
+.search-wrapper::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.search-input {
+    width: 100%;
+    min-width: 260px;
+    padding: 10px 12px 10px 34px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+}
+
+/* FILTER STATUS */
+.filter-select {
+    min-width: 140px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background-color: #ffffff;
+}
+
+/* ========= TABLE ========= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.table thead {
+    background-color: #f9fafb;
+}
+
+.table th,
+.table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ========= BADGE / STATUS ========= */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-ok {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-hold {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-investigate {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Risiko node tersangka */
+.badge-risk-high {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-risk-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-risk-low {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+/* ========= STATE / TEXT ========= */
+
+.empty-state {
+    color: #6b7280;
+    font-size: 14px;
+    padding: 8px 0;
+}
+
+/* warna teks bantu */
+.text-danger {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.text-muted {
+    color: #9ca3af;
+}
+
+/* ========= ALERT BOX ========= */
+
+.alert-red {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.alert-blue {
+    background-color: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #075985;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* ========= VISUALISASI NODE JALUR LOT (versi lama, kalau masih dipakai) ========= */
+
+.node-flow {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+    align-items: center;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.node-pill {
+    min-width: 220px;
+    text-align: center;
+    padding: 16px 20px;
+    background-color: #f9fafb;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.node-pill-title {
+    font-weight: 600;
+}
+
+.node-pill-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.node-arrow {
+    font-size: 20px;
+    color: #9ca3af;
+}
+
+/* ========= QR PLACEHOLDER ========= */
 
 .qr-wrapper {
-    margin-top: 8px;
-}
-
-.qr-wrapper img {
-    width: 180px;
-    height: 180px;
-    object-fit: contain;
-    border: 1px solid #e5e7eb;
-    padding: 8px;
-    background: #f9fafb;
-}
-
-/* === Graph / visualisasi jalur lot === */
-
-#graph-container {
-    margin-top: 8px;
-}
-
-.graph-row {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
+    justify-content: center;
+    padding: 24px 0;
 }
 
-.graph-node {
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    padding: 8px 12px;
-    min-width: 140px;
-    text-align: center;
+.qr-box {
+    width: 160px;
+    height: 160px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* versi kotak dengan pola titik */
+.qr-placeholder {
+    width: 160px;
+    height: 160px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background: #ffffff;
 }
 
-.graph-node-name {
+.qr-dot-row {
+    display: flex;
+    gap: 2px;
+    margin: 1px 0;
+}
+
+.qr-dot-row span {
+    width: 10px;
+    height: 10px;
+    background: #111827;
+    border-radius: 2px;
+}
+
+/* ========= LOT PATH VISUALIZATION ========= */
+
+.lot-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.lot-node {
+    min-width: 200px;
+    text-align: center;
+    padding: 16px 20px;
+    background-color: #f9fafb;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.lot-node-name {
     font-weight: 600;
     margin-bottom: 4px;
 }
 
-.graph-node-type {
-    font-size: 0.8rem;
+.lot-node-type {
+    font-size: 13px;
     color: #6b7280;
-    text-transform: capitalize;
 }
 
-.graph-arrow {
-    font-size: 1.4rem;
-    color: #4b5563;
+.lot-path-arrow {
+    font-size: 20px;
+    color: #9ca3af;
+}
+
+/* ========= BASIC INFO SECTION DI DETAIL LOT ========= */
+
+.basic-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.basic-info-right {
+    text-align: right;
+}
+
+.lot-code-large {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* grid untuk detail kiri */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px 40px;
+    margin-top: 12px;
+}
+
+.info-item dt {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.info-item dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* ========= LOT SUMMARY CARD (kalau nanti mau dipakai di halaman lain) ========= */
+
+.lot-summary-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.lot-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.lot-summary-meta {
+    text-align: right;
+    font-size: 14px;
+}
+
+.lot-summary-id {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.lot-summary-producer {
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.lot-summary-status {
+    margin-bottom: 4px;
+}
+
+.lot-summary-date {
+    color: #6b7280;
+}
+
+.lot-summary-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.lot-summary-labels {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.lot-summary-row {
+    margin-bottom: 6px;
+}
+
+.lot-summary-row dt {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.lot-summary-footer {
+    text-align: right;
 }

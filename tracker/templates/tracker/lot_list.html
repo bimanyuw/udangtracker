@@ -1,44 +1,91 @@
 {% extends "tracker/base.html" %}
 
-{% block title %}Daftar Lot | Udang Tracker{% endblock %}
-
 {% block content %}
-    <h2>Daftar Lot Udang</h2>
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Daftar Lot</h1>
+        <p class="page-subtitle">Ringkasan seluruh lot yang teregistrasi di sistem.</p>
+    </div>
 
-    {% if lots %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Lot ID</th>
-                    <th>Pembuat</th>
-                    <th>Status</th>
-                    <th>Dibuat Pada</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lot in lots %}
+    <div class="card">
+
+        <!-- HEADER CARD + SEARCH & FILTER -->
+        <div class="list-header">
+            <h2 class="card-title">Semua Lot</h2>
+
+            <form method="get" class="list-toolbar">
+                <!-- SEARCH -->
+                <div class="search-wrapper">
+                    <input
+                        type="text"
+                        name="q"
+                        class="search-input"
+                        placeholder="Cari berdasarkan Lot ID..."
+                        value="{{ q }}">
+                </div>
+
+                <!-- FILTER STATUS -->
+                <div class="filter-wrapper">
+                    <select name="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="all" {% if status == "all" %}selected{% endif %}>
+                            Semua Status
+                        </option>
+                        <option value="OK" {% if status == "OK" %}selected{% endif %}>
+                            Aman
+                        </option>
+                        <option value="HOLD" {% if status == "HOLD" %}selected{% endif %}>
+                            Ditahan
+                        </option>
+                        <option value="INVESTIGATE" {% if status == "INVESTIGATE" %}selected{% endif %}>
+                            Investigasi
+                        </option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        {% if lots %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Lot ID</th>
+                        <th>Pembuat</th>
+                        <th>Status</th>
+                        <th>Dibuat Pada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lot in lots %}
                     <tr>
                         <td>
-                            <a href="{% url 'tracker:lot_detail' lot.lot_id %}">
+                            <a class="link-inline" href="{% url 'tracker:lot_detail' lot.lot_id %}">
                                 {{ lot.lot_id }}
                             </a>
                         </td>
-                        <td>{{ lot.creator.username|default:"-" }}</td>
+                        <td>
+                            {{ lot.creator.username|default:"-" }}
+                        </td>
                         <td>
                             {% if lot.status == "OK" %}
-                                <span class="badge badge-ok">{{ lot.get_status_display }}</span>
+                                <span class="badge badge-ok">Aman</span>
                             {% elif lot.status == "HOLD" %}
-                                <span class="badge badge-hold">{{ lot.get_status_display }}</span>
+                                <span class="badge badge-hold">Ditahan</span>
                             {% elif lot.status == "INVESTIGATE" %}
-                                <span class="badge badge-investigate">{{ lot.get_status_display }}</span>
+                                <span class="badge badge-investigate">Investigasi</span>
+                            {% else %}
+                                {{ lot.status }}
                             {% endif %}
                         </td>
-                        <td>{{ lot.created_at }}</td>
+                        <td>{{ lot.created_at|date:"Y-m-d H:i" }}</td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Belum ada lot yang terdaftar.</p>
-    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty-state">Tidak ada lot yang sesuai dengan filter.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
