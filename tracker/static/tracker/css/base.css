@@ -13,7 +13,7 @@ body {
     color: #111827;
 }
 
-/* Kalau base.html pakai .app-shell, ini bantu full height */
+/* Shell layout dari base.html */
 .app-shell {
     min-height: 100vh;
     background-color: #f3f4f6;
@@ -82,7 +82,7 @@ body {
     padding: 0 24px;
 }
 
-/* ==== PAGE TITLE WITH ICON ==== */
+/* ========= PAGE TITLE + ICON ========= */
 
 .page-title-row {
     display: flex;
@@ -101,13 +101,13 @@ body {
 }
 
 .page-title-icon-info {
-    background-color: #e0f2fe;   /* biru muda */
-    color: #0284c7;               /* biru tua */
+    background-color: #e0f2fe;
+    color: #0284c7;
 }
 
 .page-title-icon-alert {
-    background-color: #fee2e2;   /* merah muda */
-    color: #dc2626;              /* merah */
+    background-color: #fee2e2;
+    color: #dc2626;
 }
 
 .page-title-icon svg {
@@ -115,11 +115,10 @@ body {
     height: 18px;
 }
 
-/* supaya subtitle agak dekat dengan title */
+/* supaya subtitle dekat dengan title */
 .page-header {
     margin-bottom: 24px;
 }
-
 
 .page-title {
     font-size: 28px;
@@ -187,8 +186,8 @@ body {
 
 .list-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
     gap: 16px;
     flex-wrap: wrap;
     margin-bottom: 16px;
@@ -198,19 +197,16 @@ body {
     margin: 0;
 }
 
-/* container search + filter */
 .list-toolbar {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-end;
+    align-items: center;
+    gap: 12px;
 }
 
-@media (min-width: 768px) {
-    .list-toolbar {
-        flex-direction: row;
-        align-items: center;
-    }
+.list-toolbar-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* SEARCH */
@@ -306,7 +302,7 @@ body {
     color: #b91c1c;
 }
 
-/* Risiko node tersangka */
+/* Risiko / risk level */
 .badge-risk-high {
     background-color: #fee2e2;
     color: #b91c1c;
@@ -330,7 +326,6 @@ body {
     padding: 8px 0;
 }
 
-/* warna teks bantu */
 .text-danger {
     color: #dc2626;
     font-weight: 500;
@@ -362,305 +357,18 @@ body {
     margin-bottom: 20px;
 }
 
-/* ========= VISUALISASI NODE JALUR LOT (versi lama, kalau masih dipakai) ========= */
+/* ========= BUTTON ========= */
 
-.node-flow {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 16px;
-    align-items: center;
-    overflow-x: auto;
-    padding: 8px 0;
-}
-
-.node-pill {
-    min-width: 220px;
-    text-align: center;
-    padding: 16px 20px;
-    background-color: #f9fafb;
-    border-radius: 16px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-.node-pill-title {
-    font-weight: 600;
-}
-
-.node-pill-subtitle {
-    font-size: 13px;
-    color: #6b7280;
-}
-
-.node-arrow {
-    font-size: 20px;
-    color: #9ca3af;
-}
-
-/* ========= QR PLACEHOLDER ========= */
-
-.qr-wrapper {
-    display: flex;
-    justify-content: center;
-    padding: 24px 0;
-}
-
-.qr-box {
-    width: 160px;
-    height: 160px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* versi kotak dengan pola titik */
-.qr-placeholder {
-    width: 160px;
-    height: 160px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #ffffff;
-}
-
-.qr-dot-row {
-    display: flex;
-    gap: 2px;
-    margin: 1px 0;
-}
-
-.qr-dot-row span {
-    width: 10px;
-    height: 10px;
-    background: #111827;
-    border-radius: 2px;
-}
-
-/* ========= LOT PATH VISUALIZATION ========= */
-
-.lot-path {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-    overflow-x: auto;
-    padding: 8px 0;
-}
-
-.lot-node {
-    min-width: 200px;
-    text-align: center;
-    padding: 16px 20px;
-    background-color: #f9fafb;
-    border-radius: 16px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-.lot-node-name {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.lot-node-type {
-    font-size: 13px;
-    color: #6b7280;
-}
-
-.lot-path-arrow {
-    font-size: 20px;
-    color: #9ca3af;
-}
-
-/* ========= BASIC INFO SECTION DI DETAIL LOT ========= */
-
-.basic-info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 8px;
-}
-
-.basic-info-right {
-    text-align: right;
-}
-
-.lot-code-large {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-/* grid untuk detail kiri */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px 40px;
-    margin-top: 12px;
-}
-
-.info-item dt {
-    font-size: 13px;
-    color: #6b7280;
-    margin-bottom: 4px;
-}
-
-.info-item dd {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-    color: #111827;
-}
-
-/* ========= LOT SUMMARY CARD (kalau nanti mau dipakai di halaman lain) ========= */
-
-.lot-summary-card {
-    background-color: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-}
-
-.lot-summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-}
-
-.lot-summary-meta {
-    text-align: right;
-    font-size: 14px;
-}
-
-.lot-summary-id {
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 4px;
-}
-
-.lot-summary-producer {
-    color: #6b7280;
-    margin-bottom: 4px;
-}
-
-.lot-summary-status {
-    margin-bottom: 4px;
-}
-
-.lot-summary-date {
-    color: #6b7280;
-}
-
-.lot-summary-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
-}
-
-.lot-summary-labels {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 0;
-}
-
-.lot-summary-row {
-    margin-bottom: 6px;
-}
-
-.lot-summary-row dt {
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.lot-summary-footer {
-    text-align: right;
-}
-
-/* Subnav tabs untuk modul Lot */
-.subnav-card {
-    margin-bottom: 16px;
-    padding: 10px 16px;
-}
-
-.subnav-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.subnav-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 9999px;
-    background: #eff6ff;
-    font-size: 14px;
-    text-decoration: none;
-    color: #1f2937;
-    border: 1px solid #dbeafe;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
-}
-
-.subnav-tab:hover {
-    background: #dbeafe;
-    transform: translateY(-1px);
-}
-
-.subnav-tab-active {
-    background: #2563eb;
-    color: #ffffff;
-    border-color: #1d4ed8;
-}
-
-.subnav-tab-active .subnav-tab-dot {
-    background: #ffffff;
-}
-
-.subnav-tab-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    background: #60a5fa;
-}
-
-.list-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.list-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.list-toolbar-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Basic button style */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
-    padding: 6px 14px;
+    padding: 6px 16px;
     font-size: 14px;
     text-decoration: none;
-    border: 1px solid transparent;
     cursor: pointer;
+    border: 1px solid transparent;
 }
 
 .btn-sm {
@@ -678,7 +386,17 @@ body {
     background-color: #1d4ed8;
 }
 
-/* === Form layout === */
+.btn-ghost {
+    background-color: transparent;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-ghost:hover {
+    background-color: #f3f4f6;
+}
+
+/* ========= FORM LAYOUT ========= */
 
 .form-vertical {
     display: flex;
@@ -705,7 +423,6 @@ body {
     color: #111827;
 }
 
-/* Input & select look */
 .form-input,
 .form-select {
     width: 100%;
@@ -734,40 +451,3 @@ body {
     align-items: center;
     gap: 12px;
 }
-
-/* Tombol ghost buat "Batal" */
-.btn-ghost {
-    background-color: transparent;
-    color: #4b5563;
-    border: 1px solid #e5e7eb;
-}
-
-.btn-ghost:hover {
-    background-color: #f3f4f6;
-}
-
-/* Kalau belum ada .btn & .btn-primary, ini fallback-nya: */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    padding: 6px 16px;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid transparent;
-}
-
-.btn-primary {
-    background-color: #2563eb;
-    color: #ffffff;
-    border-color: #1d4ed8;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8;
-}
-
-
-

@@ -1,0 +1,130 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <div class="page-header">
+        <div class="page-title-row">
+            <span class="page-title-icon page-title-icon-alert" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4L3 19H21L12 4Z"
+                          stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                    <line x1="12" y1="10" x2="12" y2="14"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="12" cy="17" r="1" fill="currentColor" />
+                </svg>
+            </span>
+            <h1 class="page-title">Daftar Insiden Keamanan</h1>
+        </div>
+        <p class="page-subtitle">
+            Monitoring insiden yang terkait dengan lot dan tambak di rantai pasok udang.
+        </p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="metric-card">
+            <div class="metric-label">Total Insiden</div>
+            <div class="metric-value">{{ total_incidents }}</div>
+            <div class="metric-sub">
+                Open: {{ open_incidents }} · Closed: {{ closed_incidents }}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Status yang Ditampilkan</div>
+            <div class="metric-sub">
+                {% if status_filter == "open" %}
+                    Hanya insiden <b>Open</b> yang ditampilkan.
+                {% elif status_filter == "closed" %}
+                    Hanya insiden <b>Closed</b> yang ditampilkan.
+                {% else %}
+                    Menampilkan semua insiden.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="list-header">
+            <h2 class="card-title">Semua Insiden</h2>
+
+            <div class="list-toolbar">
+                <form method="get" class="list-toolbar-form">
+                    <div class="filter-wrapper">
+                        <select name="status" class="filter-select" onchange="this.form.submit()">
+                            <option value="all" {% if status_filter == "all" %}selected{% endif %}>Semua</option>
+                            <option value="open" {% if status_filter == "open" %}selected{% endif %}>Open</option>
+                            <option value="closed" {% if status_filter == "closed" %}selected{% endif %}>Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="search-wrapper">
+                        <input
+                            type="text"
+                            name="q"
+                            class="search-input"
+                            placeholder="Cari Lot ID atau tipe insiden..."
+                            value="{{ q }}">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if incidents %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Lot Utama</th>
+                        <th>Tipe Insiden</th>
+                        <th>Status</th>
+                        <th>Lot Terkait</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inc in incidents %}
+                    <tr>
+                        <td>{{ inc.date|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if inc.lot %}
+                                <a href="{% url 'tracker:lot_detail' inc.lot.lot_id %}" class="link-inline">
+                                    {{ inc.lot.lot_id }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ inc.incident_type }}</td>
+                        <td>
+                            {% if inc.status|lower == "closed" %}
+                                <span class="badge badge-ok">Closed</span>
+                            {% else %}
+                                <span class="badge badge-investigate">{{ inc.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ inc.related_lot_count|default:"1" }}
+                        </td>
+                        <td style="text-align:right;">
+                            <a href="{% url 'tracker:incident_detail' inc.pk %}" class="link-inline">
+                                Lihat detail →
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty-state">Belum ada insiden tercatat.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

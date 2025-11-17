@@ -1,0 +1,131 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/lot.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <a href="{% url 'tracker:incident_list' %}" class="back-link">
+        ← Kembali ke daftar insiden
+    </a>
+
+    <div class="page-header">
+        <h1 class="page-title">Detail Insiden</h1>
+        <p class="page-subtitle">
+            Informasi lengkap insiden dan lot-lot yang terdampak.
+        </p>
+    </div>
+
+    <section class="card">
+        <h2 class="card-title">Informasi Utama Insiden</h2>
+
+        <dl class="info-grid">
+            <div class="info-item">
+                <dt>Tipe insiden</dt>
+                <dd>{{ incident.incident_type }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Status</dt>
+                <dd>
+                    {% if incident.status|lower == "closed" %}
+                        <span class="badge badge-ok">Closed</span>
+                    {% else %}
+                        <span class="badge badge-investigate">{{ incident.status }}</span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Tanggal</dt>
+                <dd>{{ incident.date|date:"Y-m-d" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Lot utama</dt>
+                <dd>
+                    {% if incident.lot %}
+                        <a href="{% url 'tracker:lot_detail' incident.lot.lot_id %}" class="link-inline">
+                            {{ incident.lot.lot_id }}
+                        </a>
+                        {% if incident.lot.farm %}
+                            · {{ incident.lot.farm.name }}
+                        {% endif %}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">Lot Terkait Insiden Ini</h2>
+
+        {% if related_lots %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Lot ID</th>
+                        <th>Tambak</th>
+                        <th>Status Lot</th>
+                        <th>Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rel in related_lots %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'tracker:lot_detail' rel.lot.lot_id %}" class="link-inline">
+                                {{ rel.lot.lot_id }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if rel.lot.farm %}
+                                {{ rel.lot.farm.name }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rel.lot.status == "INVESTIGATE" %}
+                                <span class="badge badge-investigate">Investigate</span>
+                            {% elif rel.lot.status == "HOLD" %}
+                                <span class="badge badge-hold">Hold</span>
+                            {% else %}
+                                <span class="badge badge-ok">OK</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rel.lot.risk_level == "HIGH" %}
+                                <span class="badge badge-risk-high">
+                                    High ({{ rel.lot.risk_score|default:"-" }})
+                                </span>
+                            {% elif rel.lot.risk_level == "MEDIUM" %}
+                                <span class="badge badge-risk-medium">
+                                    Medium ({{ rel.lot.risk_score|default:"-" }})
+                                </span>
+                            {% else %}
+                                <span class="badge badge-risk-low">
+                                    Low ({{ rel.lot.risk_score|default:"-" }})
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty-state">
+                Belum ada lot lain yang ditandai sebagai terkait insiden ini.
+            </p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

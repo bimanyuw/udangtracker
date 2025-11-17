@@ -1,6 +1,9 @@
 {% extends "tracker/base.html" %}
+{% load static %}
 
-{% block title %}{{ lot.lot_id }} - Udang Tracker{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/lot.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="page-container">
@@ -121,6 +124,42 @@
             </div>
         </dl>
     </section>
+
+        <!-- ================= ANALISIS RISIKO ================= -->
+    <section class="card">
+        <h2 class="card-title">Analisis Risiko Otomatis</h2>
+        <p class="card-subtitle">
+            Status lot ditentukan secara otomatis berdasarkan reputasi tambak, umur lot,
+            volume, hasil lab, insiden, dan kualitas air.
+        </p>
+
+        <div class="risk-summary-row">
+            <div class="risk-score-chip">
+                Skor risiko: <strong>{{ risk_info.score }}</strong>/100
+            </div>
+            <div>
+                Level:
+                {% if risk_info.risk_level == "HIGH" %}
+                    <span class="badge badge-risk-high">HIGH – Investigate</span>
+                {% elif risk_info.risk_level == "MEDIUM" %}
+                    <span class="badge badge-risk-medium">MEDIUM – Hold</span>
+                {% else %}
+                    <span class="badge badge-risk-low">LOW – OK</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if risk_info.reasons %}
+            <ul class="risk-reasons-list">
+                {% for reason in risk_info.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">Belum ada cukup data untuk analisis risiko yang detail.</p>
+        {% endif %}
+    </section>
+
 
     <!-- ================= QR CODE / PUBLIC VIEW ================= -->
     <section class="card">

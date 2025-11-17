@@ -8,12 +8,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import LotForm
 from .risk_engine import calculate_lot_risk
+from .risk_engine import explain_lot_risk
+
+from django.db.models import Count, Q
+from .models import Lot, Farm, Incident, LotMovement
+from .models import Incident, IncidentRelatedLot
+
 
 # ============ HOME REDIRECT ============
 
 def home_redirect(request):
-    return redirect("tracker:lot_list")
-
+    return redirect("tracker:dashboard")
 
 # ============ LOT CORE ============
 
@@ -219,5 +224,155 @@ def lot_create(request):
         form = LotForm()
 
     return render(request, "tracker/lot_form.html", {"form": form})
+
+def lot_detail(request, lot_id: str):
+    lot = get_object_or_404(Lot, lot_id=lot_id)
+
+    movements = (
+        LotMovement.objects.filter(lot=lot)
+        .select_related("node")
+        .order_by("timestamp")
+    )
+    path_nodes = [mv.node for mv in movements]
+
+    risk_info = explain_lot_risk(lot)
+
+    context = {
+        "lot": lot,
+        "movements": movements,
+        "path_nodes": path_nodes,
+        "risk_info": risk_info,
+    }
+    return render(request, "tracker/lot_detail.html", context)
+
+def dashboard(request):
+    lots = Lot.objects.all()
+
+    # --- Ringkasan lot ---
+    total_lots = lots.count()
+    status_counts = {
+        "OK": lots.filter(status="OK").count(),
+        "HOLD": lots.filter(status="HOLD").count(),
+        "INVESTIGATE": lots.filter(status="INVESTIGATE").count(),
+    }
+    risk_counts = {
+        "LOW": lots.filter(risk_level="LOW").count(),
+        "MEDIUM": lots.filter(risk_level="MEDIUM").count(),
+        "HIGH": lots.filter(risk_level="HIGH").count(),
+    }
+
+    # Lot bermasalah terbaru
+    recent_problem_lots = (
+        lots.filter(status__in=["HOLD", "INVESTIGATE"])
+        .select_related("farm")
+        .order_by("-created_at")[:5]
+    )
+
+    # --- Ringkasan insiden ---
+    incidents = Incident.objects.all()
+    incident_counts = {
+        "total": incidents.count(),
+        "open": incidents.exclude(status__iexact="closed").count(),
+        "closed": incidents.filter(status__iexact="closed").count(),
+    }
+
+    # --- Tambak dengan performa paling bermasalah ---
+    farms = Farm.objects.annotate(
+        lot_count=Count("lots"),
+        problematic_lot_count=Count(
+            "lots", filter=Q(lots__status__in=["HOLD", "INVESTIGATE"])
+        ),
+    ).filter(lot_count__gt=0)
+
+
+    top_farms = farms.order_by("-problematic_lot_count")[:5]
+
+    # --- Node yang sering muncul di lot bermasalah ---
+    movements = LotMovement.objects.filter(
+        lot__status__in=["HOLD", "INVESTIGATE"]
+    )
+    top_nodes = (
+        movements.values("node__name", "node__type")
+        .annotate(
+            movement_count=Count("id"),
+            lots_count=Count("lot", distinct=True),
+        )
+        .order_by("-movement_count")[:5]
+    )
+
+    context = {
+        "total_lots": total_lots,
+        "status_counts": status_counts,
+        "risk_counts": risk_counts,
+        "incident_counts": incident_counts,
+        "recent_problem_lots": recent_problem_lots,
+        "top_farms": top_farms,
+        "top_nodes": top_nodes,
+    }
+    return render(request, "tracker/dashboard.html", context)
+
+def incident_list(request):
+    incidents = Incident.objects.select_related("lot").order_by("-date")
+
+    # filter & search sederhana
+    status_filter = request.GET.get("status", "all")
+    q = request.GET.get("q", "").strip()
+
+    if status_filter == "open":
+        incidents = incidents.exclude(status__iexact="closed")
+    elif status_filter == "closed":
+        incidents = incidents.filter(status__iexact="closed")
+
+    if q:
+        incidents = incidents.filter(
+            Q(lot__lot_id__icontains=q) |
+            Q(incident_type__icontains=q)
+        )
+
+    # ringkasan angka
+    total_incidents = Incident.objects.count()
+    open_incidents = Incident.objects.exclude(status__iexact="closed").count()
+    closed_incidents = Incident.objects.filter(status__iexact="closed").count()
+
+    # hitung jumlah lot terkait per insiden
+    related_counts = (
+        IncidentRelatedLot.objects
+        .values("incident_id")
+        .annotate(total=Count("lot_id"))
+    )
+    related_map = {row["incident_id"]: row["total"] for row in related_counts}
+
+    # tambahkan 1 untuk lot utama (field incident.lot)
+    for inc in incidents:
+        inc.related_lot_count = related_map.get(inc.id, 0) + (1 if inc.lot_id else 0)
+
+    context = {
+        "incidents": incidents,
+        "status_filter": status_filter,
+        "q": q,
+        "total_incidents": total_incidents,
+        "open_incidents": open_incidents,
+        "closed_incidents": closed_incidents,
+    }
+    return render(request, "tracker/incident_list.html", context)
+
+
+def incident_detail(request, pk: int):
+    incident = get_object_or_404(
+        Incident.objects.select_related("lot", "lot__farm"),
+        pk=pk,
+    )
+
+    related_lots = (
+        IncidentRelatedLot.objects
+        .filter(incident=incident)
+        .select_related("lot", "lot__farm")
+    )
+
+    context = {
+        "incident": incident,
+        "related_lots": related_lots,
+    }
+    return render(request, "tracker/incident_detail.html", context)
 
 

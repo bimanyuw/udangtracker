@@ -1,6 +1,12 @@
 {% extends "tracker/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/lot.css' %}">
+{% endblock %}
 
 {% block content %}
+
 <div class="page-container">
 
     <div class="page-header">

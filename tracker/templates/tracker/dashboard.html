@@ -1,0 +1,212 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <div class="page-header">
+        <div class="page-title-row">
+            <span class="page-title-icon page-title-icon-info" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                    <circle cx="12" cy="8" r="1" fill="currentColor" />
+                    <line x1="12" y1="11" x2="12" y2="16"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </span>
+            <h1 class="page-title">Dashboard Udang Tracker</h1>
+        </div>
+        <p class="page-subtitle">
+            Ringkasan kesehatan rantai pasok udang: lot, risiko, tambak, dan insiden.
+        </p>
+    </div>
+
+    <!-- ===== Row 1: Angka-angka utama ===== -->
+    <div class="dashboard-grid">
+        <div class="metric-card">
+            <div class="metric-label">Total Lot</div>
+            <div class="metric-value">{{ total_lots }}</div>
+            <div class="metric-sub">
+                OK: {{ status_counts.OK }} ·
+                Hold: {{ status_counts.HOLD }} ·
+                Investigate: {{ status_counts.INVESTIGATE }}
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">Distribusi Risiko Lot</div>
+            <div class="metric-chip-row">
+                <span class="badge badge-risk-low">
+                    Low: {{ risk_counts.LOW }}
+                </span>
+                <span class="badge badge-risk-medium">
+                    Medium: {{ risk_counts.MEDIUM }}
+                </span>
+                <span class="badge badge-risk-high">
+                    High: {{ risk_counts.HIGH }}
+                </span>
+            </div>
+            <div class="metric-sub">
+                Berdasarkan skor otomatis dari risk engine.
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-label">Status Insiden</div>
+            <div class="metric-value">{{ incident_counts.open }}</div>
+            <div class="metric-sub">
+                Insiden aktif dari total {{ incident_counts.total }} insiden
+                (closed: {{ incident_counts.closed }})
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Row 2: Lot bermasalah terbaru + Farm paling risk ===== -->
+    <div class="dashboard-grid dashboard-grid-2">
+        <div class="card">
+            <h2 class="card-title">Lot Bermasalah Terbaru</h2>
+            <p class="card-subtitle">
+                Lot dengan status Ditahan atau Investigasi yang paling baru tercatat.
+            </p>
+
+            {% if recent_problem_lots %}
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Lot ID</th>
+                            <th>Tambak</th>
+                            <th>Status</th>
+                            <th>Risk</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lot in recent_problem_lots %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'tracker:lot_detail' lot.lot_id %}"
+                                   class="link-inline">
+                                    {{ lot.lot_id }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if lot.farm %}
+                                    {{ lot.farm.name }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if lot.status == "INVESTIGATE" %}
+                                    <span class="badge badge-investigate">Investigasi</span>
+                                {% elif lot.status == "HOLD" %}
+                                    <span class="badge badge-hold">Ditahan</span>
+                                {% else %}
+                                    <span class="badge badge-ok">Aman</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if lot.risk_level == "HIGH" %}
+                                    <span class="badge badge-risk-high">
+                                        High ({{ lot.risk_score|default:"-" }})
+                                    </span>
+                                {% elif lot.risk_level == "MEDIUM" %}
+                                    <span class="badge badge-risk-medium">
+                                        Medium ({{ lot.risk_score|default:"-" }})
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-risk-low">
+                                        Low ({{ lot.risk_score|default:"-" }})
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ lot.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="empty-state">Belum ada lot yang berstatus Ditahan atau Investigasi.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Tambak dengan Risiko Tertinggi</h2>
+            <p class="card-subtitle">
+                Berdasarkan jumlah lot yang berstatus Hold / Investigate.
+            </p>
+
+            {% if top_farms %}
+                <ul class="dashboard-list">
+                    {% for farm in top_farms %}
+                        <li class="dashboard-list-item">
+                            <div>
+                                <div class="dashboard-item-title">
+                                    {{ farm.name }}
+                                </div>
+                                <div class="dashboard-item-sub">
+                                    {{ farm.location|default:"Lokasi tidak tersedia" }}
+                                </div>
+                            </div>
+                            <div class="dashboard-item-meta">
+                                <span class="badge badge-risk-medium">
+                                    {{ farm.problematic_lot_count }} lot bermasalah
+                                </span>
+                                <div class="dashboard-item-sub">
+                                    dari {{ farm.lot_count }} lot total
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-state">Belum ada data tambak dengan lot bermasalah.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ===== Row 3: Node tersangka singkat ===== -->
+    <div class="card">
+        <h2 class="card-title">Node Paling Sering Terlibat dalam Lot Bermasalah</h2>
+        <p class="card-subtitle">
+            Ringkasan cepat node yang sering muncul di pergerakan lot berstatus Hold / Investigate.
+            Untuk analisis lebih detail, buka halaman <a href="{% url 'tracker:suspect_nodes' %}" class="link-inline">
+            Node Tersangka</a>.
+        </p>
+
+        {% if top_nodes %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Node</th>
+                        <th>Tipe</th>
+                        <th>Jumlah Movement</th>
+                        <th>Terlibat di Lot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for node in top_nodes %}
+                    <tr>
+                        <td>{{ node.node__name }}</td>
+                        <td>{{ node.node__type }}</td>
+                        <td>{{ node.movement_count }}</td>
+                        <td>{{ node.lots_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty-state">Belum ada data node yang terlibat lot bermasalah.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
