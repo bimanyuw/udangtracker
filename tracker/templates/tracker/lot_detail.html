@@ -37,12 +37,41 @@
             </div>
 
             <div class="info-item">
+                <dt>Tambak:</dt>
+                <dd>
+                    {% if lot.farm %}
+                        <a class="link-inline" href="{% url 'tracker:farm_detail' lot.farm.pk %}">
+                            {{ lot.farm.name }}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Belum dikaitkan</span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
                 <dt>Dibuat oleh:</dt>
                 <dd>{{ lot.creator.username|default:"-" }}</dd>
             </div>
 
             <div class="info-item">
-                <dt>Status:</dt>
+                <dt>Tanggal panen:</dt>
+                <dd>{{ lot.harvest_date|default:"-" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Volume:</dt>
+                <dd>
+                    {% if lot.volume_kg %}
+                        {{ lot.volume_kg }} kg
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Status kontaminasi:</dt>
                 <dd>
                     {% if lot.status == "OK" %}
                         <span class="badge badge-ok">Aman</span>
@@ -57,11 +86,6 @@
             </div>
 
             <div class="info-item">
-                <dt>Tanggal dibuat:</dt>
-                <dd>{{ lot.created_at|date:"Y-m-d H:i" }}</dd>
-            </div>
-
-            <div class="info-item">
                 <dt>Jenis kontaminasi:</dt>
                 <dd>
                     {% if lot.jenis_kontaminasi %}
@@ -71,15 +95,40 @@
                     {% endif %}
                 </dd>
             </div>
+
+            <div class="info-item">
+                <dt>Risk score:</dt>
+                <dd>
+                    {% if lot.risk_level == "HIGH" %}
+                        <span class="badge badge-danger">
+                            High ({{ lot.risk_score }})
+                        </span>
+                    {% elif lot.risk_level == "MEDIUM" %}
+                        <span class="badge badge-warning">
+                            Medium ({{ lot.risk_score }})
+                        </span>
+                    {% else %}
+                        <span class="badge badge-ok">
+                            Low ({{ lot.risk_score }})
+                        </span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Tanggal dibuat:</dt>
+                <dd>{{ lot.created_at|date:"Y-m-d H:i" }}</dd>
+            </div>
         </dl>
     </section>
 
-    <!-- ================= QR CODE ================= -->
+    <!-- ================= QR CODE / PUBLIC VIEW ================= -->
     <section class="card">
         <h2 class="card-title">Paspor Digital (QR Code)</h2>
         <p class="card-subtitle">
-            Scan QR code ini untuk melihat informasi lengkap lot di aplikasi mobile.
+            Scan QR code ini untuk melihat informasi lengkap lot di tampilan publik.
         </p>
+
         <div class="qr-wrapper">
             <!-- placeholder QR sederhana -->
             <div class="qr-placeholder">
@@ -96,6 +145,21 @@
                     <span></span><span></span><span></span><span></span>
                 </div>
             </div>
+
+            <div class="qr-links">
+                <p class="text-sm text-muted">
+                    Link publik:<br>
+                    <a class="link-inline" href="{% url 'tracker:public_lot' lot.public_token %}">
+                        {% url 'tracker:public_lot' lot.public_token %}
+                    </a>
+                </p>
+                <p class="text-sm text-muted">
+                    Endpoint internal QR (dev):<br>
+                    <a class="link-inline" href="{% url 'tracker:lot_qr' lot.lot_id %}">
+                        {% url 'tracker:lot_qr' lot.lot_id %}
+                    </a>
+                </p>
+            </div>
         </div>
     </section>
 
@@ -110,8 +174,8 @@
             <div class="lot-path">
                 {% for item in path_nodes %}
                     <div class="lot-node">
-                        <div class="lot-node-name">{{ item.node.name }}</div>
-                        <div class="lot-node-type">{{ item.node.type|title }}</div>
+                        <div class="lot-node-name">{{ item.name }}</div>
+                        <div class="lot-node-type">{{ item.type|title }}</div>
                     </div>
                     {% if not forloop.last %}
                         <div class="lot-path-arrow">→</div>
@@ -134,6 +198,7 @@
                         <tr>
                             <th>Waktu</th>
                             <th>Node</th>
+                            <th>Jenis</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -141,6 +206,7 @@
                         <tr>
                             <td>{{ m.timestamp|date:"Y-m-d H:i" }}</td>
                             <td>{{ m.node.name }}</td>
+                            <td>{{ m.node.type|title }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -151,4 +217,24 @@
         {% endif %}
     </section>
 
+    <!-- ================= SLOT MODUL LAIN (nanti diisi temenmu) ================= -->
+    <section class="card">
+        <h2 class="card-title">Hasil Uji Lab</h2>
+        <p class="card-subtitle">Ringkasan sampling & parameter uji yang terkait dengan lot ini.</p>
+        <p class="empty-state">Belum ada data uji lab. (Nanti diisi modul Lab)</p>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">Dokumen & Sertifikasi</h2>
+        <p class="card-subtitle">Dokumen resmi yang mengikat lot ini (sertifikat lab, dokumen ekspor, dll).</p>
+        <p class="empty-state">Belum ada dokumen. (Nanti diisi modul Dokumen)</p>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">Insiden Keamanan</h2>
+        <p class="card-subtitle">Catatan penolakan ekspor, gagal uji, atau keluhan buyer terkait lot ini.</p>
+        <p class="empty-state">Belum ada insiden. (Nanti diisi modul Incident)</p>
+    </section>
+
+</div>
 {% endblock %}

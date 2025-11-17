@@ -1,0 +1,120 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Tambak {{ farm.name }} - Udang Tracker{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <a href="{% url 'tracker:farm_list' %}" class="back-link">
+        ← Kembali ke daftar tambak
+    </a>
+
+    <header class="page-header">
+        <h1 class="page-title">{{ farm.name }}</h1>
+        <p class="page-subtitle">
+            Profil tambak dan lot yang terkait.
+        </p>
+    </header>
+
+    <!-- Info dasar tambak -->
+    <section class="card">
+        <h2 class="card-title">Informasi Tambak</h2>
+
+        <dl class="info-grid">
+            <div class="info-item">
+                <dt>Nama Tambak:</dt>
+                <dd>{{ farm.name }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Lokasi:</dt>
+                <dd>{{ farm.location|default:"-" }}</dd>
+            </div>
+
+            <div class="info-item">
+                <dt>Pemilik:</dt>
+                <dd>{{ farm.owner_name|default:"-" }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <!-- Lot yang terkait -->
+    <section class="card">
+        <h2 class="card-title">Lot dari Tambak Ini</h2>
+        <p class="card-subtitle">
+            Daftar lot yang sumbernya dari tambak ini.
+        </p>
+
+        {% if farm.lots.all %}
+            {% if farm.lots.count %}
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Lot ID</th>
+                                <th>Status</th>
+                                <th>Risk</th>
+                                <th>Tanggal Panen</th>
+                                <th>Dibuat Pada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lot in farm.lots.all %}
+                            <tr>
+                                <td>
+                                    <a class="link-inline" href="{% url 'tracker:lot_detail' lot.lot_id %}">
+                                        {{ lot.lot_id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if lot.status == "OK" %}
+                                        <span class="badge badge-ok">Aman</span>
+                                    {% elif lot.status == "HOLD" %}
+                                        <span class="badge badge-hold">Ditahan</span>
+                                    {% elif lot.status == "INVESTIGATE" %}
+                                        <span class="badge badge-investigate">Investigasi</span>
+                                    {% else %}
+                                        {{ lot.status }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if lot.risk_level == "HIGH" %}
+                                        <span class="badge badge-danger">
+                                            High ({{ lot.risk_score }})
+                                        </span>
+                                    {% elif lot.risk_level == "MEDIUM" %}
+                                        <span class="badge badge-warning">
+                                            Medium ({{ lot.risk_score }})
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-ok">
+                                            Low ({{ lot.risk_score }})
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ lot.harvest_date|default:"-" }}</td>
+                                <td>{{ lot.created_at|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="empty-state">Belum ada lot dari tambak ini.</p>
+            {% endif %}
+        {% else %}
+            <p class="empty-state">Belum ada lot dari tambak ini.</p>
+        {% endif %}
+    </section>
+
+    <!-- Slot PondLog -->
+    <section class="card">
+        <h2 class="card-title">Log Kualitas Tambak</h2>
+        <p class="card-subtitle">
+            Diisi dengan catatan pH, suhu, salinitas, pakan, dan bahan kimia (modul PondLog).
+        </p>
+        <p class="empty-state">Belum ada data log. (Nanti diisi modul PondLog)</p>
+    </section>
+
+</div>
+{% endblock %}

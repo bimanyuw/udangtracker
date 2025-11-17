@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$f5ir)epwxftx31b00a=il)$r%mui(*p=z$3fbjrdkflkt@jig', os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+DEBUG = True    
 
 ALLOWED_HOSTS = ["udang-tracker.onrender.com", "localhost", "127.0.0.1"]
 

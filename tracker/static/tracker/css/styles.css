@@ -82,9 +82,44 @@ body {
     padding: 0 24px;
 }
 
+/* ==== PAGE TITLE WITH ICON ==== */
+
+.page-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-title-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.page-title-icon-info {
+    background-color: #e0f2fe;   /* biru muda */
+    color: #0284c7;               /* biru tua */
+}
+
+.page-title-icon-alert {
+    background-color: #fee2e2;   /* merah muda */
+    color: #dc2626;              /* merah */
+}
+
+.page-title-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* supaya subtitle agak dekat dengan title */
 .page-header {
     margin-bottom: 24px;
 }
+
 
 .page-title {
     font-size: 28px;
@@ -182,16 +217,6 @@ body {
 .search-wrapper {
     position: relative;
     width: 260px;
-}
-
-.search-wrapper::before {
-    content: "";
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    color: #9ca3af;
 }
 
 .search-input {

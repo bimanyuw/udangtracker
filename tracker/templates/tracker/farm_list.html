@@ -1,0 +1,49 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Tambak - Udang Tracker{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Daftar Tambak</h1>
+        <p class="page-subtitle">
+            Profil tambak yang terdaftar di sistem.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">Semua Tambak</h2>
+
+        {% if farms %}
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nama Tambak</th>
+                        <th>Lokasi</th>
+                        <th>Pemilik</th>
+                        <th>Jumlah Lot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for farm in farms %}
+                    <tr>
+                        <td>
+                            <a class="link-inline" href="{% url 'tracker:farm_detail' farm.pk %}">
+                                {{ farm.name }}
+                            </a>
+                        </td>
+                        <td>{{ farm.location|default:"-" }}</td>
+                        <td>{{ farm.owner_name|default:"-" }}</td>
+                        <td>{{ farm.lots.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty-state">Belum ada tambak yang terdaftar.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

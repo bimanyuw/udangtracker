@@ -1,16 +1,46 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Count
+from django.http import JsonResponse, HttpResponse
 
-from .models import Lot, Node, LotMovement
+from .models import Lot, Node, LotMovement, Farm
+# nanti bisa tambah: Incident, Document, Sampling, LabTest, dst kalau sudah dipakai
 
+
+# ============ HOME REDIRECT ============
+
+def home_redirect(request):
+    return redirect("tracker:lot_list")
+
+
+# ============ LOT CORE ============
 
 def lot_list(request):
-    lots = Lot.objects.order_by("-created_at")
-    return render(request, "tracker/lot_list.html", {"lots": lots})
+    lots = Lot.objects.all().order_by("-created_at")
+
+    # ambil query string
+    q = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "all")
+
+    # filter search Lot ID
+    if q:
+        lots = lots.filter(lot_id__icontains=q)
+
+    # filter status
+    if status in ["OK", "HOLD", "INVESTIGATE"]:
+        lots = lots.filter(status=status)
+
+    context = {
+        "lots": lots,
+        "q": q,
+        "status": status,
+    }
+    return render(request, "tracker/lot_list.html", context)
 
 
 def contaminated_lots(request):
-    lots = Lot.objects.filter(status__in=["HOLD", "INVESTIGATE"]).order_by("-created_at")
+    lots = Lot.objects.filter(status__in=["HOLD", "INVESTIGATE"]).order_by(
+        "-created_at"
+    )
     return render(request, "tracker/contaminated_lots.html", {"lots": lots})
 
 
@@ -77,17 +107,16 @@ def lot_detail(request, lot_id: str):
         "lot": lot,
         "movements": movements,
         "path_nodes": path_nodes,
+        # nanti di sini bisa ditambah:
+        # - samplings / lab tests
+        # - documents
+        # - incidents
     }
     return render(request, "tracker/lot_detail.html", context)
 
 
-# Optional: placeholder untuk endpoint lain yang sudah ada di urls
-from django.http import JsonResponse, HttpResponse
-
-
 def lot_qr(request, lot_id: str):
-    # Bisa nanti diisi generator QR asli;
-    # sementara return placeholder saja.
+    # TODO: nanti bisa diganti render template berisi QR beneran
     return HttpResponse(f"QR endpoint for lot {lot_id}", content_type="text/plain")
 
 
@@ -113,25 +142,53 @@ def lot_trace_json(request, lot_id: str):
     }
     return JsonResponse(data)
 
-def lot_list(request):
-    lots = Lot.objects.all().order_by("-created_at")
 
-    # ambil query string
-    q = request.GET.get("q", "").strip()
-    status = request.GET.get("status", "all")
+# ============ FARMS ============
 
-    # filter search Lot ID
-    if q:
-        lots = lots.filter(lot_id__icontains=q)
-
-    # filter status
-    if status in ["OK", "HOLD", "INVESTIGATE"]:
-        lots = lots.filter(status=status)
-
+def farm_list(request):
+    farms = Farm.objects.all().order_by("name")
     context = {
-        "lots": lots,
-        "q": q,
-        "status": status,
+        "farms": farms,
     }
-    return render(request, "tracker/lot_list.html", context)
+    return render(request, "tracker/farm_list.html", context)
 
+
+def farm_detail(request, pk):
+    farm = get_object_or_404(Farm, pk=pk)
+    # nanti di sini bisa tampilkan PondLog & ringkasan risk
+    context = {
+        "farm": farm,
+    }
+    return render(request, "tracker/farm_detail.html", context)
+
+
+# ============ DASHBOARD ============
+
+def dashboard(request):
+    # TODO: diisi modul dashboard (query agregat)
+    context = {}
+    return render(request, "tracker/dashboard.html", context)
+
+
+# ============ INCIDENTS ============
+
+def incident_list(request):
+    # TODO: diisi pakai model Incident
+    context = {}
+    return render(request, "tracker/incident_list.html", context)
+
+
+def incident_detail(request, pk):
+    # TODO: ganti dengan get_object_or_404(Incident, pk=pk)
+    context = {"incident_id": pk}
+    return render(request, "tracker/incident_detail.html", context)
+
+
+# ============ PUBLIC VIEW QR ============
+
+def public_lot(request, token):
+    lot = get_object_or_404(Lot, public_token=token)
+    context = {
+        "lot": lot,
+    }
+    return render(request, "tracker/public_lot.html", context)
