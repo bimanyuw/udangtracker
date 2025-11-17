@@ -7,43 +7,64 @@
         <p class="page-subtitle">Ringkasan seluruh lot yang teregistrasi di sistem.</p>
     </div>
 
-    <div class="card">
+    {# SUBNAV UNTUK MODUL LOT #}
+    <div class="card subnav-card">
+        <div class="subnav-tabs">
+            {% url 'tracker:lot_list' as lot_list_url %}
+            {% url 'tracker:contaminated_lots' as contaminated_url %}
+            {% url 'tracker:suspect_nodes' as suspects_url %}
 
-        <!-- HEADER CARD + SEARCH & FILTER -->
-        <div class="list-header">
-            <h2 class="card-title">Semua Lot</h2>
-
-            <form method="get" class="list-toolbar">
-                <!-- SEARCH -->
-                <div class="search-wrapper">
-                    <input
-                        type="text"
-                        name="q"
-                        class="search-input"
-                        placeholder="Cari berdasarkan Lot ID..."
-                        value="{{ q }}">
-                </div>
-
-                <!-- FILTER STATUS -->
-                <div class="filter-wrapper">
-                    <select name="status" class="filter-select" onchange="this.form.submit()">
-                        <option value="all" {% if status == "all" %}selected{% endif %}>
-                            Semua Status
-                        </option>
-                        <option value="OK" {% if status == "OK" %}selected{% endif %}>
-                            Aman
-                        </option>
-                        <option value="HOLD" {% if status == "HOLD" %}selected{% endif %}>
-                            Ditahan
-                        </option>
-                        <option value="INVESTIGATE" {% if status == "INVESTIGATE" %}selected{% endif %}>
-                            Investigasi
-                        </option>
-                    </select>
-                </div>
-            </form>
+            <a href="{{ lot_list_url }}"
+               class="subnav-tab {% if request.path == lot_list_url %}subnav-tab-active{% endif %}">
+                <span class="subnav-tab-dot"></span>
+                <span>Semua Lot</span>
+            </a>
+            <a href="{{ contaminated_url }}"
+               class="subnav-tab {% if request.path == contaminated_url %}subnav-tab-active{% endif %}">
+                <span class="subnav-tab-dot"></span>
+                <span>Lot Terkontaminasi</span>
+            </a>
+            <a href="{{ suspects_url }}"
+               class="subnav-tab {% if request.path == suspects_url %}subnav-tab-active{% endif %}">
+                <span class="subnav-tab-dot"></span>
+                <span>Node Tersangka</span>
+            </a>
         </div>
+    </div>
 
+    <div class="card">
+        <!-- HEADER CARD + SEARCH & FILTER -->
+            <div class="list-header">
+                <h2 class="card-title">Semua Lot</h2>
+
+                <div class="list-toolbar">
+                    {% if request.user.is_authenticated and request.user.is_staff %}
+                        <a href="{% url 'tracker:lot_create' %}" class="btn btn-primary btn-sm">
+                            + Tambah Lot
+                        </a>
+                    {% endif %}
+
+                    <form method="get" class="list-toolbar-form">
+                        <div class="search-wrapper">
+                            <input
+                                type="text"
+                                name="q"
+                                class="search-input"
+                                placeholder="Cari berdasarkan Lot ID..."
+                                value="{{ q }}">
+                        </div>
+
+                        <div class="filter-wrapper">
+                            <select name="status" class="filter-select" onchange="this.form.submit()">
+                                <option value="all" {% if status == "all" %}selected{% endif %}>Semua Status</option>
+                                <option value="OK" {% if status == "OK" %}selected{% endif %}>Aman</option>
+                                <option value="HOLD" {% if status == "HOLD" %}selected{% endif %}>Ditahan</option>
+                                <option value="INVESTIGATE" {% if status == "INVESTIGATE" %}selected{% endif %}>Investigasi</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
         {% if lots %}
         <div class="table-wrapper">
             <table class="table">

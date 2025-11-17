@@ -1,0 +1,42 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">Tambah Lot Baru</h1>
+        <p class="page-subtitle">
+            Admin dapat mendaftarkan batch udang baru. Status & risk akan dihitung otomatis oleh sistem.
+        </p>
+    </div>
+
+    <div class="card">
+        <form method="post" class="form-vertical">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-grid">
+                {% for field in form %}
+                    <div class="form-field">
+                        <label class="form-label" for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Simpan Lot
+                </button>
+                <a href="{% url 'tracker:lot_list' %}" class="btn btn-ghost">
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

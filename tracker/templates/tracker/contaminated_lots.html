@@ -18,18 +18,42 @@
             <h1 class="page-title">Daftar Lot Terkontaminasi</h1>
         </div>
         <p class="page-subtitle">
-            Lot yang terdeteksi mengandung kontaminasi berdasarkan hasil QC
+            Lot yang terdeteksi mengandung kontaminasi berdasarkan hasil QC.
         </p>
     </div>
 
+        <div class="alert-red">
+            ⚠ Daftar ini menampilkan lot dengan status <b>Ditahan</b> atau <b>Investigasi</b>.
+            Dibutuhkan tindakan untuk mengisolasi dan menelusuri sumber kontaminasi.
+        </div>
 
-    <div class="alert-red">
-        ⚠ Daftar ini menampilkan lot dengan status <b>Ditahan</b> atau <b>Investigasi</b>.
-        Dibutuhkan tindakan untuk mengisolasi dan menelusuri sumber kontaminasi.
-    </div>
+        {# SUBNAV UNTUK MODUL LOT #}
+        <div class="card subnav-card">
+            <div class="subnav-tabs">
+                {% url 'tracker:lot_list' as lot_list_url %}
+                {% url 'tracker:contaminated_lots' as contaminated_url %}
+                {% url 'tracker:suspect_nodes' as suspects_url %}
 
-    <div class="card">
-        <h2 class="card-title">Lot Terdeteksi Kontaminasi</h2>
+                <a href="{{ lot_list_url }}"
+                class="subnav-tab {% if request.path == lot_list_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Semua Lot</span>
+                </a>
+                <a href="{{ contaminated_url }}"
+                class="subnav-tab {% if request.path == contaminated_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Lot Terkontaminasi</span>
+                </a>
+                <a href="{{ suspects_url }}"
+                class="subnav-tab {% if request.path == suspects_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Node Tersangka</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Lot Terdeteksi Kontaminasi</h2>
 
         {% if lots %}
         <div class="table-wrapper">
@@ -37,8 +61,10 @@
                 <thead>
                     <tr>
                         <th>Lot ID</th>
+                        <th>Tambak</th>
                         <th>Jenis Kontaminasi</th>
                         <th>Status</th>
+                        <th>Risk</th>
                         <th>Dibuat Pada</th>
                     </tr>
                 </thead>
@@ -49,6 +75,15 @@
                             <a class="link-inline" href="{% url 'tracker:lot_detail' lot.lot_id %}">
                                 {{ lot.lot_id }}
                             </a>
+                        </td>
+                        <td>
+                            {% if lot.farm %}
+                                <a class="link-inline" href="{% url 'tracker:farm_detail' lot.farm.pk %}">
+                                    {{ lot.farm.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
                         </td>
                         <td style="color:#dc2626; font-weight:600;">
                             {% if lot.jenis_kontaminasi %}
@@ -66,6 +101,21 @@
                                 <span class="badge badge-ok">Aman</span>
                             {% else %}
                                 {{ lot.status }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lot.risk_level == "HIGH" %}
+                                <span class="badge badge-danger">
+                                    High ({{ lot.risk_score }})
+                                </span>
+                            {% elif lot.risk_level == "MEDIUM" %}
+                                <span class="badge badge-warning">
+                                    Medium ({{ lot.risk_score }})
+                                </span>
+                            {% else %}
+                                <span class="badge badge-ok">
+                                    Low ({{ lot.risk_score }})
+                                </span>
                             {% endif %}
                         </td>
                         <td>{{ lot.created_at|date:"Y-m-d H:i" }}</td>

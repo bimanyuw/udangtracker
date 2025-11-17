@@ -19,37 +19,25 @@
                 </div>
 
                 <nav class="nav-links">
-                    {# URL utama #}
-                    {% url 'tracker:lot_list' as lot_list_url %}
-                    {% url 'tracker:contaminated_lots' as contaminated_url %}
-                    {% url 'tracker:suspect_nodes' as suspects_url %}
-                    {% url 'tracker:farm_list' as farm_list_url %}
+                    {# URL utama untuk navbar #}
                     {% url 'tracker:dashboard' as dashboard_url %}
+                    {% url 'tracker:lot_list' as lot_list_url %}
+                    {% url 'tracker:farm_list' as farm_list_url %}
                     {% url 'tracker:incident_list' as incidents_url %}
+
+                    <a href="{{ dashboard_url }}"
+                       class="nav-link {% if request.path == dashboard_url or request.path == '/' %}nav-link-active{% endif %}">
+                        Dashboard
+                    </a>
 
                     <a href="{{ lot_list_url }}"
                        class="nav-link {% if request.path == lot_list_url %}nav-link-active{% endif %}">
-                        Daftar Lot
-                    </a>
-
-                    <a href="{{ contaminated_url }}"
-                       class="nav-link {% if request.path == contaminated_url %}nav-link-active{% endif %}">
-                        Lot Terkontaminasi
-                    </a>
-
-                    <a href="{{ suspects_url }}"
-                       class="nav-link {% if request.path == suspects_url %}nav-link-active{% endif %}">
-                        Node Tersangka
+                        Lot
                     </a>
 
                     <a href="{{ farm_list_url }}"
                        class="nav-link {% if request.path == farm_list_url %}nav-link-active{% endif %}">
                         Tambak
-                    </a>
-
-                    <a href="{{ dashboard_url }}"
-                       class="nav-link {% if request.path == dashboard_url %}nav-link-active{% endif %}">
-                        Dashboard
                     </a>
 
                     <a href="{{ incidents_url }}"

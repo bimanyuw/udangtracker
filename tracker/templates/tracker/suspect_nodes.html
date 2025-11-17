@@ -17,19 +17,43 @@
             <h1 class="page-title">Analisis Node Tersangka</h1>
         </div>
         <p class="page-subtitle">
-            Identifikasi node yang paling sering terlibat dalam lot bermasalah
+            Identifikasi node yang paling sering terlibat dalam lot bermasalah.
         </p>
     </div>
 
+        <div class="alert-blue">
+            Dashboard ini menganalisis node-node dalam rantai pasok yang memiliki keterlibatan tinggi
+            dengan lot terkontaminasi. Gunakan informasi ini untuk audit preventif dan peningkatan kualitas.
+        </div>
 
-    <div class="alert-blue">
-        Dashboard ini menganalisis node-node dalam rantai pasok yang memiliki keterlibatan tinggi
-        dengan lot terkontaminasi. Gunakan informasi ini untuk audit preventif dan peningkatan kualitas.
-    </div>
+        {# SUBNAV UNTUK MODUL LOT #}
+        <div class="card subnav-card">
+            <div class="subnav-tabs">
+                {% url 'tracker:lot_list' as lot_list_url %}
+                {% url 'tracker:contaminated_lots' as contaminated_url %}
+                {% url 'tracker:suspect_nodes' as suspects_url %}
 
-    <!-- Ringkasan Lot Bermasalah -->
-    <div class="card">
-        <h2 class="card-title">Ringkasan Lot Bermasalah</h2>
+                <a href="{{ lot_list_url }}"
+                class="subnav-tab {% if request.path == lot_list_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Semua Lot</span>
+                </a>
+                <a href="{{ contaminated_url }}"
+                class="subnav-tab {% if request.path == contaminated_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Lot Terkontaminasi</span>
+                </a>
+                <a href="{{ suspects_url }}"
+                class="subnav-tab {% if request.path == suspects_url %}subnav-tab-active{% endif %}">
+                    <span class="subnav-tab-dot"></span>
+                    <span>Node Tersangka</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Ringkasan Lot Bermasalah</h2>
+
 
         {% if problematic_lots %}
         <div class="table-wrapper">
@@ -44,7 +68,11 @@
                 <tbody>
                     {% for lot in problematic_lots %}
                     <tr>
-                        <td>{{ lot.lot_id }}</td>
+                        <td>
+                            <a class="link-inline" href="{% url 'tracker:lot_detail' lot.lot_id %}">
+                                {{ lot.lot_id }}
+                            </a>
+                        </td>
                         <td>
                             {% if lot.status == "INVESTIGATE" %}
                                 <span class="badge badge-investigate">Investigasi</span>
@@ -95,7 +123,9 @@
                         <td>{{ s.lots_count }}</td>
                         <td>
                             {% for l in s.lots %}
-                                {{ l }}{% if not forloop.last %}, {% endif %}
+                                <a class="link-inline" href="{% url 'tracker:lot_detail' l %}">
+                                    {{ l }}
+                                </a>{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </td>
                         <td>

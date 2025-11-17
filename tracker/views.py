@@ -3,8 +3,11 @@ from django.db.models import Count
 from django.http import JsonResponse, HttpResponse
 
 from .models import Lot, Node, LotMovement, Farm
-# nanti bisa tambah: Incident, Document, Sampling, LabTest, dst kalau sudah dipakai
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
 
+from .forms import LotForm
+from .risk_engine import calculate_lot_risk
 
 # ============ HOME REDIRECT ============
 
@@ -192,3 +195,29 @@ def public_lot(request, token):
         "lot": lot,
     }
     return render(request, "tracker/public_lot.html", context)
+
+def lot_create(request):
+    # hanya admin/staff yang boleh
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return HttpResponseForbidden("Anda tidak memiliki izin untuk menambahkan lot.")
+
+    if request.method == "POST":
+        form = LotForm(request.POST)
+        if form.is_valid():
+            lot = form.save(commit=False)
+            lot.creator = request.user
+
+            # hitung risk & status awal pakai algoritma
+            score, level, status = calculate_lot_risk(lot)
+            lot.risk_score = score
+            lot.risk_level = level
+            lot.status = status
+
+            lot.save()
+            return redirect("tracker:lot_detail", lot_id=lot.lot_id)
+    else:
+        form = LotForm()
+
+    return render(request, "tracker/lot_form.html", {"form": form})
+
+
