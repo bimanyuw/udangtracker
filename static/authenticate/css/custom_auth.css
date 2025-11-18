@@ -1,0 +1,92 @@
+/* myapp/static/css/custom_auth.css */
+
+/* Warna utama dari dashboard (biru gelap) */
+:root {
+    --udang-primary-color: #007bff; /* Biru terang untuk tombol/link */
+    --udang-dark-blue: #0A3251; /* Biru gelap untuk header, background card */
+    --udang-background: #f8f9fa; /* Background utama */
+}
+
+/* Background seluruh halaman */
+body {
+    background-color: var(--udang-background);
+}
+
+/* Container untuk menengahkan form */
+.auth-container {
+    padding: 20px;
+    background-color: var(--udang-background);
+}
+
+/* Card/Kotak Form */
+.auth-card {
+    max-width: 400px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sesuai dengan gaya card di dashboard */
+}
+
+/* Judul Utama */
+.card-title-udang {
+    font-weight: 700;
+    color: var(--udang-dark-blue);
+    margin-bottom: 5px;
+}
+
+/* Subtitle/Judul Form */
+.card-subtitle-udang {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid var(--udang-primary-color);
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+/* Styling Input Field */
+.auth-form input[type="text"], 
+.auth-form input[type="password"] {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+    width: 100%;
+}
+
+/* Tombol Primary */
+.btn-primary-udang {
+    background-color: var(--udang-primary-color);
+    border-color: var(--udang-primary-color);
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary-udang:hover {
+    background-color: #0056b3; /* Biru sedikit lebih gelap saat hover */
+    border-color: #0056b3;
+}
+
+/* Link */
+.link-udang {
+    color: var(--udang-primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-udang:hover {
+    text-decoration: underline;
+}
+
+/* Penyesuaian tampilan field error */
+.auth-form ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 5px;
+}
+
+.auth-form .errorlist {
+    color: #dc3545; /* Merah untuk error */
+    font-size: 0.875em;
+}

@@ -8,4 +8,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", tracker_views.lot_list, name="home"),
     path("", include("tracker.urls")),
+    path("authenticate/", include("authenticate.urls")),
 ]

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+    <div class="text-center mb-6 border-b pb-4 border-gray-200">
+        <h2 class="text-3xl font-bold text-gray-800">Register</h2>
+        <p class="text-sm text-gray-500 mt-1">Buat Akun</p>
+    </div>
+
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        {% for field in auth_form %}
+            <div class="space-y-1">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ field.label }}
+                </label>
+                {{ field.errors }}
+                <input 
+                    type="{{ field.field.widget.input_type }}" 
+                    name="{{ field.name }}" 
+                    id="{{ field.id_for_label }}" 
+                    required 
+                    placeholder="{{ field.label }}"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+            </div>
+        {% endfor %}
+        
+        {% if auth_form.non_field_errors %}
+            <div class="text-red-600 text-sm p-3 bg-red-100 rounded-lg">
+                {% for error in auth_form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button type="submit" 
+                class="w-full py-2 px-4 border border-transparent rounded-lg shadow-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out mt-4">
+            Daftar
+        </button>
+    </form>
+
+    <div class="mt-6 text-center text-sm">
+        Sudah punya akun? 
+        <a href="{% url 'authenticate:login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+            Masuk
+        </a>
+    </div>
+</div>
+{% endblock %}
