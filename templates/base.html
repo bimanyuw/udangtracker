@@ -16,107 +16,13 @@
 <body class="bg-slate-50">
     <div class="app-shell">
         <!-- Navigation -->
-        <header class="navbar gradient-ocean shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <img src="{% static 'images/MCFLEURI.png' %}" 
-                        alt="Logo FindMyShrimp" 
-                        class="w-15 h-15 object-contain">
-                </div>
-                
-                <div class="hidden sm:block">
-                    <h1 class="text-white font-bold text-lg leading-tight">FindMyShrimp</h1>
-                    <p class="text-cyan-100 text-xs">Smart Shrimp Traceability</p>
-                </div>
-            </div>
-            
-            <nav class="hidden md:flex items-center space-x-1">
-                {% url 'tracker:dashboard' as dashboard_url %}
-                {% url 'tracker:lot_list' as lot_list_url %}
-                {% url 'tracker:farm_list' as farm_list_url %}
-                {% url 'tracker:incident_list' as incidents_url %}
-
-                <a href="{{ dashboard_url }}" class="{% if request.path == dashboard_url or request.path == '/' %}bg-white/20 text-white{% else %}text-cyan-100 hover:bg-white/10 hover:text-white{% endif %} px-3 py-2 rounded-lg text-sm font-medium smooth-transition">Dashboard</a>
-                <a href="{{ lot_list_url }}" class="{% if request.path == lot_list_url %}bg-white/20 text-white{% else %}text-cyan-100 hover:bg-white/10 hover:text-white{% endif %} px-3 py-2 rounded-lg text-sm font-medium smooth-transition">Lot</a>
-                <a href="{{ farm_list_url }}" class="{% if request.path == farm_list_url %}bg-white/20 text-white{% else %}text-cyan-100 hover:bg-white/10 hover:text-white{% endif %} px-3 py-2 rounded-lg text-sm font-medium smooth-transition">Tambak</a>
-                <a href="{{ incidents_url }}" class="{% if request.path == incidents_url %}bg-white/20 text-white{% else %}text-cyan-100 hover:bg-white/10 hover:text-white{% endif %} px-3 py-2 rounded-lg text-sm font-medium smooth-transition">Insiden</a>
-            </nav>
-
-            <div class="hidden md:flex items-center space-x-3">
-                {% if user.is_authenticated %}
-                    <div class="flex items-center space-x-2 text-white bg-white/10 px-3 py-1.5 rounded-full">
-                        <svg class="w-5 h-5 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span class="text-sm font-medium">{{ user.username }}</span>
-                    </div>
-                    <form method="post" action="{% url 'authenticate:logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="text-cyan-100 hover:text-white text-sm font-medium smooth-transition">
-                            Logout
-                        </button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'authenticate:login' %}" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-bold shadow-md smooth-transition transform hover:scale-105">
-                        Login
-                    </a>
-                {% endif %}
-            </div>
-            
-            <button id="mobile-menu-button" class="md:hidden text-white p-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-        </div>
-        
-        <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-white/10 mt-2 pt-2">
-            <div class="flex flex-col space-y-2">
-                <a href="{{ dashboard_url }}" class="text-cyan-100 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium block">Dashboard</a>
-                <a href="{{ lot_list_url }}" class="text-cyan-100 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium block">Lot</a>
-                <a href="{{ farm_list_url }}" class="text-cyan-100 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium block">Tambak</a>
-                <a href="{{ incidents_url }}" class="text-cyan-100 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium block">Insiden</a>
-                
-                <div class="border-t border-white/10 pt-2 mt-2 space-y-2">
-                    {% if user.is_authenticated %}
-                        <div class="px-4 py-2 text-white flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                <span class="text-xs font-bold">{{ user.username|slice:":1"|upper }}</span>
-                            </div>
-                            <span>Halo, {{ user.username }}</span>
-                        </div>
-                        <form method="post" action="{% url 'authenticate:logout' %}" class="w-full">
-                            {% csrf_token %}
-                            <button type="submit" class="w-full text-left text-red-200 hover:text-red-100 hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium block">
-                                Logout
-                            </button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'authenticate:login' %}" class="block mx-4 text-center bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-bold">
-                            Login
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
+   
 
         <!-- Main Content -->
         <main>
             {% block content %}{% endblock %}
         </main>
     </div>
-
-    <!-- Mobile Menu Toggle Script -->
-    <script>
-        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-    </script>
 </body>
 </html>
 

@@ -3,6 +3,7 @@
 {% block title %}Tambak {{ farm.name }} - Udang Tracker{% endblock %}
 
 {% block content %}
+{% include 'navbar.html' %}
 <div class="page-container">
 
     <a href="{% url 'tracker:farm_list' %}" class="back-link">
