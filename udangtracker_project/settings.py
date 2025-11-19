@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$f5ir)epwxftx31b00a=il)$r%mui(*p=z$3fbjrdkflkt@jig
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True    
 
-ALLOWED_HOSTS = ["udang-tracker.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["udang-tracker.onrender.com", '127.0.0.1', 'localhost', '.vercel.app']
 
 # Application definition
 
