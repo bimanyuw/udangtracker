@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-$f5ir)epwxftx31b00a=il)$r%mui(*p=z$3fbjrdkflkt@jig
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True    
 
-ALLOWED_HOSTS = ["udang-tracker.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["udang-tracker.onrender.com", '127.0.0.1', 'localhost', '.vercel.app']
 
 # Application definition
 
@@ -76,11 +77,12 @@ WSGI_APPLICATION = 'udangtracker_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Konfigurasi Database: Prioritaskan PostgreSQL dari Vercel, fallback ke SQLite untuk lokal
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
+        conn_max_age=600
+    )
 }
 
 
