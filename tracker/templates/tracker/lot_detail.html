@@ -22,108 +22,122 @@
 
     <!-- ================= INFORMASI DASAR ================= -->
     <section class="card">
-        <div class="basic-info-header">
+        <div class="section-grid">
             <div>
-                <h2 class="card-title">Informasi Dasar</h2>
+                <div class="basic-info-header">
+                    <div>
+                        <h2 class="card-title">Informasi Dasar</h2>
+                        <p class="card-subtitle">Profil inti lot sebelum analisis.</p>
+                    </div>
+                    <div class="basic-info-right">
+                        <div class="lot-code-large">{{ lot.lot_id }}</div>
+                        <a href="{% url 'tracker:suspect_nodes' %}" class="link-inline">
+                            🔍 Lihat dashboard node tersangka
+                        </a>
+                    </div>
+                </div>
+
+                <dl class="info-grid">
+                    <div class="info-item">
+                        <dt>Lot ID</dt>
+                        <dd>{{ lot.lot_id }}</dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Tambak</dt>
+                        <dd>
+                            {% if lot.farm %}
+                                <a class="link-inline" href="{% url 'tracker:farm_detail' lot.farm.pk %}">
+                                    {{ lot.farm.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Belum dikaitkan</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Dibuat oleh</dt>
+                        <dd>{{ lot.creator.username|default:"-" }}</dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Tanggal panen</dt>
+                        <dd>{{ lot.harvest_date|default:"-" }}</dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Volume</dt>
+                        <dd>
+                            {% if lot.volume_kg %}
+                                {{ lot.volume_kg }} kg
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Status kontaminasi</dt>
+                        <dd>
+                            {% if lot.status == "OK" %}
+                                <span class="badge badge-ok">Aman</span>
+                            {% elif lot.status == "HOLD" %}
+                                <span class="badge badge-hold">Ditahan</span>
+                            {% elif lot.status == "INVESTIGATE" %}
+                                <span class="badge badge-investigate">Investigasi</span>
+                            {% else %}
+                                {{ lot.status }}
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Jenis kontaminasi</dt>
+                        <dd>
+                            {% if lot.jenis_kontaminasi %}
+                                <span class="text-danger">{{ lot.jenis_kontaminasi }}</span>
+                            {% else %}
+                                <span class="text-muted">Tidak ada (lot aman)</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+
+                    <div class="info-item">
+                        <dt>Tanggal dibuat</dt>
+                        <dd>{{ lot.created_at|date:"Y-m-d H:i" }}</dd>
+                    </div>
+                </dl>
             </div>
-            <div class="basic-info-right">
-                <div class="lot-code-large">{{ lot.lot_id }}</div>
-                <a href="{% url 'tracker:suspect_nodes' %}" class="link-inline">
-                    🔍 Lihat dashboard node tersangka
-                </a>
+
+            <div class="risk-pane">
+                <div class="risk-pane-header">
+                    <p class="risk-pane-label">Analisis Risiko otomatis</p>
+                    <span class="risk-score">{{ risk_info.score }}/100</span>
+                </div>
+                <p class="risk-pane-level">
+                    Level:
+                    {% if risk_info.risk_level == "HIGH" %}
+                        <span class="badge badge-risk-high">HIGH – Investigate</span>
+                    {% elif risk_info.risk_level == "MEDIUM" %}
+                        <span class="badge badge-risk-medium">MEDIUM – Hold</span>
+                    {% else %}
+                        <span class="badge badge-risk-low">LOW – OK</span>
+                    {% endif %}
+                </p>
+                <div class="risk-reason-box">
+                    {% if risk_info.reasons %}
+                        <ul class="risk-reasons-list">
+                            {% for reason in risk_info.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="empty-state">Belum ada cukup data untuk analisis risiko yang detail.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-
-        <dl class="info-grid">
-            <div class="info-item">
-                <dt>Lot ID:</dt>
-                <dd>{{ lot.lot_id }}</dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Tambak:</dt>
-                <dd>
-                    {% if lot.farm %}
-                        <a class="link-inline" href="{% url 'tracker:farm_detail' lot.farm.pk %}">
-                            {{ lot.farm.name }}
-                        </a>
-                    {% else %}
-                        <span class="text-muted">Belum dikaitkan</span>
-                    {% endif %}
-                </dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Dibuat oleh:</dt>
-                <dd>{{ lot.creator.username|default:"-" }}</dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Tanggal panen:</dt>
-                <dd>{{ lot.harvest_date|default:"-" }}</dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Volume:</dt>
-                <dd>
-                    {% if lot.volume_kg %}
-                        {{ lot.volume_kg }} kg
-                    {% else %}
-                        <span class="text-muted">-</span>
-                    {% endif %}
-                </dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Status kontaminasi:</dt>
-                <dd>
-                    {% if lot.status == "OK" %}
-                        <span class="badge badge-ok">Aman</span>
-                    {% elif lot.status == "HOLD" %}
-                        <span class="badge badge-hold">Ditahan</span>
-                    {% elif lot.status == "INVESTIGATE" %}
-                        <span class="badge badge-investigate">Investigasi</span>
-                    {% else %}
-                        {{ lot.status }}
-                    {% endif %}
-                </dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Jenis kontaminasi:</dt>
-                <dd>
-                    {% if lot.jenis_kontaminasi %}
-                        <span class="text-danger">{{ lot.jenis_kontaminasi }}</span>
-                    {% else %}
-                        <span class="text-muted">Tidak ada (lot aman)</span>
-                    {% endif %}
-                </dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Risk score:</dt>
-                <dd>
-                    {% if lot.risk_level == "HIGH" %}
-                        <span class="badge badge-danger">
-                            High ({{ lot.risk_score }})
-                        </span>
-                    {% elif lot.risk_level == "MEDIUM" %}
-                        <span class="badge badge-warning">
-                            Medium ({{ lot.risk_score }})
-                        </span>
-                    {% else %}
-                        <span class="badge badge-ok">
-                            Low ({{ lot.risk_score }})
-                        </span>
-                    {% endif %}
-                </dd>
-            </div>
-
-            <div class="info-item">
-                <dt>Tanggal dibuat:</dt>
-                <dd>{{ lot.created_at|date:"Y-m-d H:i" }}</dd>
-            </div>
-        </dl>
     </section>
 
         <!-- ================= ANALISIS RISIKO ================= -->
@@ -170,28 +184,13 @@
         </p>
 
         <div class="qr-wrapper">
-            <!-- placeholder QR sederhana -->
-            <div class="qr-placeholder">
-                <div class="qr-dot-row">
-                    <span></span><span></span><span></span><span></span>
-                </div>
-                <div class="qr-dot-row">
-                    <span></span><span></span><span></span><span></span>
-                </div>
-                <div class="qr-dot-row">
-                    <span></span><span></span><span></span><span></span>
-                </div>
-                <div class="qr-dot-row">
-                    <span></span><span></span><span></span><span></span>
-                </div>
+            <div class="qr-box">
+                <img src="{{ qr_data_uri }}" alt="QR untuk {{ lot.lot_id }}" class="qr-image">
             </div>
-
             <div class="qr-links">
                 <p class="text-sm text-muted">
                     Link publik:<br>
-                    <a class="link-inline" href="{% url 'tracker:public_lot' lot.public_token %}">
-                        {% url 'tracker:public_lot' lot.public_token %}
-                    </a>
+                    <a class="link-inline" href="{{ public_url }}">{{ public_url }}</a>
                 </p>
                 <p class="text-sm text-muted">
                     Endpoint internal QR (dev):<br>
@@ -207,7 +206,7 @@
     <section class="card">
         <h2 class="card-title">Visualisasi Jalur Lot</h2>
         <p class="card-subtitle">
-            Diagram node-node yang dilalui lot ini di sepanjang rantai pasok.
+            Diagram node-node yang dilalui lot ini di sepanjang rantai pasok beserta estimasi peluang kontaminasi.
         </p>
 
         {% if path_nodes %}
@@ -216,6 +215,16 @@
                     <div class="lot-node">
                         <div class="lot-node-name">{{ item.name }}</div>
                         <div class="lot-node-type">{{ item.type|title }}</div>
+                        <div class="lot-node-risk">
+                            {% if item.chance %}
+                                <div class="risk-progress">
+                                    <div class="risk-progress-bar" style="width: {{ item.chance }}%"></div>
+                                </div>
+                                <p class="risk-progress-label">Perkiraan sumber kontaminasi: {{ item.chance }}%</p>
+                            {% else %}
+                                <p class="risk-progress-label text-muted">Belum ada data pembanding</p>
+                            {% endif %}
+                        </div>
                     </div>
                     {% if not forloop.last %}
                         <div class="lot-path-arrow">→</div>
@@ -261,19 +270,90 @@
     <section class="card">
         <h2 class="card-title">Hasil Uji Lab</h2>
         <p class="card-subtitle">Ringkasan sampling & parameter uji yang terkait dengan lot ini.</p>
-        <p class="empty-state">Belum ada data uji lab. (Nanti diisi modul Lab)</p>
+        {% if lab_tests %}
+            <div class="table-wrapper">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal Sampling</th>
+                            <th>Parameter</th>
+                            <th>Nilai</th>
+                            <th>Batas</th>
+                            <th>Hasil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in lab_tests %}
+                            <tr>
+                                <td>{{ test.sampling_date }}</td>
+                                <td>{{ test.parameter }}</td>
+                                <td>
+                                    {% if test.value %}
+                                        {{ test.value }} {{ test.unit }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ test.limit_value|default:"-" }}</td>
+                                <td>
+                                    {% if test.result == "FAIL" %}
+                                        <span class="badge badge-danger">FAIL</span>
+                                    {% else %}
+                                        <span class="badge badge-ok">PASS</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty-state">Belum ada data uji lab untuk lot ini.</p>
+        {% endif %}
     </section>
 
     <section class="card">
         <h2 class="card-title">Dokumen & Sertifikasi</h2>
         <p class="card-subtitle">Dokumen resmi yang mengikat lot ini (sertifikat lab, dokumen ekspor, dll).</p>
-        <p class="empty-state">Belum ada dokumen. (Nanti diisi modul Dokumen)</p>
+        {% if documents %}
+            <ul class="document-list">
+                {% for doc in documents %}
+                    <li class="document-item">
+                        <div>
+                            <p class="document-title">{{ doc.title }}</p>
+                            <p class="document-meta">{{ doc.get_doc_type_display }} {% if doc.issue_date %}· {{ doc.issue_date }}{% endif %}</p>
+                        </div>
+                        {% if doc.file %}
+                            <a class="link-inline" href="{{ doc.file.url }}" target="_blank" rel="noopener">Lihat</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">Belum ada dokumen terkait lot ini atau tambaknya.</p>
+        {% endif %}
     </section>
 
     <section class="card">
         <h2 class="card-title">Insiden Keamanan</h2>
         <p class="card-subtitle">Catatan penolakan ekspor, gagal uji, atau keluhan buyer terkait lot ini.</p>
-        <p class="empty-state">Belum ada insiden. (Nanti diisi modul Incident)</p>
+        {% if incidents %}
+            <ul class="incident-list">
+                {% for inc in incidents %}
+                    <li class="incident-item">
+                        <div>
+                            <p class="incident-title">{{ inc.get_incident_type_display }} · {{ inc.date }}</p>
+                            <p class="incident-desc">{{ inc.description }}</p>
+                        </div>
+                        <span class="badge {% if inc.status == 'OPEN' %}badge-investigate{% elif inc.status == 'IN_PROGRESS' %}badge-warning{% else %}badge-ok{% endif %}">
+                            {{ inc.get_status_display }}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">Belum ada insiden yang dicatat untuk lot ini.</p>
+        {% endif %}
     </section>
 
 </div>
