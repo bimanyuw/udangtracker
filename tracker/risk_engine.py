@@ -1,7 +1,10 @@
 from datetime import timedelta
+from typing import List, Dict, Any
 
+from django.db.models import Q, Count
 from django.utils import timezone
-from .models import LabTest, PondLog, Incident, Lot
+
+from .models import LabTest, PondLog, Incident, Lot, LotMovement, Node
 
 
 def calculate_lot_risk(lot: Lot):
@@ -249,3 +252,93 @@ def explain_lot_risk(lot: Lot):
         "status": status,
         "reasons": reasons,
     }
+
+
+def estimate_node_contamination_probabilities(lot: Lot) -> List[Dict[str, Any]]:
+    """
+    Estimasi peluang kontaminasi per node pada journey lot.
+
+    Metodologi sederhana:
+    - Hitung total lot dan lot bermasalah (HOLD/INVESTIGATE) yang pernah melewati node tersebut.
+    - Tambahkan sinyal insiden aktif yang terkait lot di node itu.
+    - Normalisasi menjadi persentase sehingga bisa divisualisasikan di UI.
+    """
+
+    movements = (
+        LotMovement.objects.filter(lot=lot)
+        .select_related("node")
+        .order_by("timestamp")
+    )
+
+    ordered_nodes: List[Node] = []
+    seen: set[int] = set()
+    for mv in movements:
+        # simpan urutan node tanpa menduplikasi jika berturut-turut sama
+        if mv.node_id not in seen or not ordered_nodes or ordered_nodes[-1].id != mv.node_id:
+            ordered_nodes.append(mv.node)
+            seen.add(mv.node_id)
+
+    if not ordered_nodes:
+        return []
+
+    node_ids = [n.id for n in ordered_nodes]
+
+    # agregasi lintas seluruh lot yang pernah lewat node-node terkait
+    stats = (
+        LotMovement.objects.filter(node_id__in=node_ids)
+        .values("node_id")
+        .annotate(
+            lot_count=Count("lot", distinct=True),
+            problematic_count=Count(
+                "lot",
+                filter=Q(lot__status__in=["HOLD", "INVESTIGATE"]),
+                distinct=True,
+            ),
+            incident_count=Count(
+                "lot__incidents",
+                filter=~Q(lot__incidents__status="CLOSED"),
+                distinct=True,
+            ),
+        )
+    )
+
+    stats_map = {item["node_id"]: item for item in stats}
+
+    weights = []
+    for node in ordered_nodes:
+        node_stat = stats_map.get(
+            node.id,
+            {"lot_count": 0, "problematic_count": 0, "incident_count": 0},
+        )
+        if node_stat["lot_count"]:
+            base_ratio = node_stat["problematic_count"] / node_stat["lot_count"]
+        else:
+            # jika belum ada riwayat, beri bobot kecil untuk tetap tampil di visualisasi
+            base_ratio = 0.05
+
+        # insiden aktif memberikan bobot tambahan per insiden
+        incident_bonus = 0.03 * node_stat.get("incident_count", 0)
+        weight = base_ratio + incident_bonus
+        weights.append(max(weight, 0.01))
+
+    total_weight = sum(weights) or 1
+
+    result = []
+    for node, weight in zip(ordered_nodes, weights):
+        node_stat = stats_map.get(
+            node.id,
+            {"lot_count": 0, "problematic_count": 0, "incident_count": 0},
+        )
+        probability = round((weight / total_weight) * 100, 1)
+        result.append(
+            {
+                "node_id": node.id,
+                "node": node,
+                "probability": probability,
+                "lot_count": node_stat.get("lot_count", 0),
+                "problematic_count": node_stat.get("problematic_count", 0),
+                "incident_count": node_stat.get("incident_count", 0),
+            }
+        )
+
+    return result

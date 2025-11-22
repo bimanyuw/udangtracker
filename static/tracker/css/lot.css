@@ -36,7 +36,9 @@
 
 .qr-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
     padding: 24px 0;
 }
 
@@ -48,6 +50,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.qr-image {
+    width: 144px;
+    height: 144px;
+    object-fit: contain;
 }
 
 /* versi kotak dengan pola titik */
@@ -111,6 +119,29 @@
     color: #9ca3af;
 }
 
+.lot-node-risk {
+    margin-top: 12px;
+}
+
+.risk-progress {
+    width: 100%;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.risk-progress-bar {
+    height: 10px;
+    background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444);
+}
+
+.risk-progress-label {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #374151;
+}
+
 /* ========= BASIC INFO SECTION DI DETAIL LOT ========= */
 
 .basic-info-header {
@@ -123,6 +154,19 @@
 
 .basic-info-right {
     text-align: right;
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .section-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .lot-code-large {
@@ -150,6 +194,43 @@
     font-size: 14px;
     font-weight: 500;
     color: #111827;
+}
+
+.risk-pane {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.risk-pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.risk-pane-label {
+    margin: 0;
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+.risk-score {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.risk-pane-level {
+    margin: 0 0 10px 0;
+}
+
+.risk-reason-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
 }
 
 /* ========= LOT SUMMARY CARD ========= */
@@ -291,4 +372,39 @@
     padding-left: 18px;
     font-size: 14px;
     line-height: 1.6;
+}
+
+.document-list,
+.incident-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.document-item,
+.incident-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+
+.document-title,
+.incident-title {
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    color: #111827;
+}
+
+.document-meta,
+.incident-desc {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
 }
