@@ -1,13 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Tambak {{ farm.name }} - Udang Tracker{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'tracker/css/lot.css' %}">
+{% endblock %}
 
 {% block content %}
 {% include 'navbar.html' %}
 <div class="page-container">
 
     <a href="{% url 'tracker:farm_list' %}" class="back-link">
-        ← Kembali ke daftar tambak
+        &larr; Kembali ke daftar tambak
     </a>
 
     <header class="page-header">
