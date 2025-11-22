@@ -200,15 +200,19 @@
     background: #0f172a;
     color: #e2e8f0;
     border-radius: 14px;
-    padding: 16px;
+    padding: 18px 20px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 16px;
 }
 
 .risk-pane-header {
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 0;
 }
 
 .risk-pane-label {
@@ -223,14 +227,34 @@
 }
 
 .risk-pane-level {
-    margin: 0 0 10px 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .risk-reason-box {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    border-radius: 12px;
+    padding: 12px 14px;
+    grid-column: 1 / -1;
+}
+
+.risk-reasons-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.risk-reasons-list li {
     padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    line-height: 1.45;
 }
 
 /* ========= LOT SUMMARY CARD ========= */

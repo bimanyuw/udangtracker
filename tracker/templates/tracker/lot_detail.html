@@ -80,15 +80,20 @@
                     <div class="info-item">
                         <dt>Status kontaminasi</dt>
                         <dd>
-                            {% if lot.status == "OK" %}
+                            {% with display_status=risk_info.status|default:lot.status %}
+                            {% if display_status == "OK" %}
                                 <span class="badge badge-ok">Aman</span>
-                            {% elif lot.status == "HOLD" %}
+                            {% elif display_status == "HOLD" %}
                                 <span class="badge badge-hold">Ditahan</span>
-                            {% elif lot.status == "INVESTIGATE" %}
+                            {% elif display_status == "INVESTIGATE" %}
                                 <span class="badge badge-investigate">Investigasi</span>
                             {% else %}
-                                {{ lot.status }}
+                                {{ display_status }}
                             {% endif %}
+                            {% if lot.status != display_status %}
+                                <div class="text-muted text-sm">Status tercatat: {{ lot.status }}</div>
+                            {% endif %}
+                            {% endwith %}
                         </dd>
                     </div>
 
@@ -139,43 +144,6 @@
             </div>
         </div>
     </section>
-
-        <!-- ================= ANALISIS RISIKO ================= -->
-    <section class="card">
-        <h2 class="card-title">Analisis Risiko Otomatis</h2>
-        <p class="card-subtitle">
-            Status lot ditentukan secara otomatis berdasarkan reputasi tambak, umur lot,
-            volume, hasil lab, insiden, dan kualitas air.
-        </p>
-
-        <div class="risk-summary-row">
-            <div class="risk-score-chip">
-                Skor risiko: <strong>{{ risk_info.score }}</strong>/100
-            </div>
-            <div>
-                Level:
-                {% if risk_info.risk_level == "HIGH" %}
-                    <span class="badge badge-risk-high">HIGH – Investigate</span>
-                {% elif risk_info.risk_level == "MEDIUM" %}
-                    <span class="badge badge-risk-medium">MEDIUM – Hold</span>
-                {% else %}
-                    <span class="badge badge-risk-low">LOW – OK</span>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if risk_info.reasons %}
-            <ul class="risk-reasons-list">
-                {% for reason in risk_info.reasons %}
-                    <li>{{ reason }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="empty-state">Belum ada cukup data untuk analisis risiko yang detail.</p>
-        {% endif %}
-    </section>
-
-
     <!-- ================= QR CODE / PUBLIC VIEW ================= -->
     <section class="card">
         <h2 class="card-title">Paspor Digital (QR Code)</h2>
@@ -278,13 +246,15 @@
                             <th>Tanggal Sampling</th>
                             <th>Parameter</th>
                             <th>Nilai</th>
-                            <th>Batas</th>
-                            <th>Hasil</th>
+                            <th>Batas Standar</th>
+                            <th>Status</th>
+                            <th>Kategori</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for test in lab_tests %}
-                            <tr>
+                            {% with critical_params="Salmonella,Kloramfenikol,Metabolit Nitrofurans" %}
+                            <tr class="{% if test.result == 'FAIL' %}row-fail{% endif %}">
                                 <td>{{ test.sampling_date }}</td>
                                 <td>{{ test.parameter }}</td>
                                 <td>
@@ -294,7 +264,16 @@
                                         <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ test.limit_value|default:"-" }}</td>
+                                <td>
+                                    {% if test.limit_value %}
+                                        {{ test.limit_value }}
+                                        {% if test.value and test.limit_value and test.value > test.limit_value %}
+                                            <span class="badge badge-danger">Di atas batas</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if test.result == "FAIL" %}
                                         <span class="badge badge-danger">FAIL</span>
@@ -302,7 +281,15 @@
                                         <span class="badge badge-ok">PASS</span>
                                     {% endif %}
                                 </td>
+                                <td>
+                                    {% if test.parameter in critical_params %}
+                                        <span class="badge badge-investigate">Kritis</span>
+                                    {% else %}
+                                        <span class="badge badge-ok">Rutin</span>
+                                    {% endif %}
+                                </td>
                             </tr>
+                            {% endwith %}
                         {% endfor %}
                     </tbody>
                 </table>

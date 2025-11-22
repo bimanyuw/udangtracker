@@ -6,21 +6,76 @@ from django.utils import timezone
 
 from .models import LabTest, PondLog, Incident, Lot, LotMovement, Node
 
+# Standar mutu dan keamanan udang beku (ringkas dari tabel persyaratan)
+# Keys mengikuti nama parameter di LabTest.parameter
+STANDARD_LIMITS = {
+    # Cemaran mikroba
+    "ALT": {"limit": 1_000_000, "cmp": "<=", "severity": 25, "label": "Angka Lempeng Total"},
+    "E.coli": {"limit": 1, "cmp": "<=", "severity": 40, "label": "E. coli"},
+    "Salmonella": {"limit": 0, "cmp": "==", "severity": 60, "label": "Salmonella"},
+    "Vibrio parahaemolyticus": {"limit": 10, "cmp": "<=", "severity": 40, "label": "Vibrio parahaemolyticus"},
+    # Cemaran logam
+    "Merkuri (Hg)": {"limit": 0.5, "cmp": "<=", "severity": 30},
+    "Timbal (Pb)": {"limit": 0.2, "cmp": "<=", "severity": 30},
+    "Kadmium (Cd)": {"limit": 0.1, "cmp": "<=", "severity": 30},
+    # Residu antibiotik
+    "Kloramfenikol": {"limit": 0, "cmp": "==", "severity": 60},
+    "Metabolit Nitrofurans": {"limit": 0, "cmp": "==", "severity": 60},
+    "Tetrasiklin": {"limit": 100, "cmp": "<=", "severity": 30},
+}
+
+
+def evaluate_lab_test(test: LabTest):
+    """
+    Cek satu hasil lab terhadap batas standar.
+    Return: (violated: bool, delta_score: int, message: str)
+    """
+    spec = STANDARD_LIMITS.get(test.parameter)
+    if not spec:
+        return False, 0, None
+
+    value = test.value
+    limit = spec["limit"]
+    cmp_op = spec["cmp"]
+    severity = spec["severity"]
+    label = spec.get("label", test.parameter)
+
+    # treat missing value as violation for safety when comparator expects a value
+    if value is None:
+        violated = True
+    elif cmp_op == "<=":
+        violated = value > limit
+    elif cmp_op == "<":
+        violated = value >= limit
+    elif cmp_op == "==":
+        violated = value != limit
+    else:
+        violated = False
+
+    unit = f" {test.unit}" if getattr(test, "unit", None) else ""
+    if violated:
+        message = f"{label} melebihi batas ({value}{unit}, limit {limit}) (+{severity})"
+    else:
+        message = f"{label} sesuai batas ({value}{unit}) (+0)"
+
+    return violated, severity if violated else 0, message
+
 
 def calculate_lot_risk(lot: Lot):
     """
-    Hitung risk_score (0–100), risk_level (LOW/MEDIUM/HIGH),
+    Hitung risk_score (0-100), risk_level (LOW/MEDIUM/HIGH),
     dan status (OK/HOLD/INVESTIGATE) secara otomatis.
     Faktor yang dipakai:
       - Reputasi farm (riwayat lot bermasalah & insiden)
       - Umur lot (sejak tanggal panen)
       - Volume lot (dampak kalau bermasalah)
-      - Hasil lab (PASS/FAIL)
+      - Hasil lab terhadap batas standar
       - Insiden aktif
       - Kualitas air tambak (pH & salinitas terakhir)
     """
 
     score = 0
+    critical_violation = False
 
     # === 0. Reputasi farm (riwayat lot bermasalah) ===
     if lot.farm:
@@ -43,21 +98,21 @@ def calculate_lot_risk(lot: Lot):
         days = (today - lot.harvest_date).days
 
         if days <= 2:
-            score += 5      # masih sangat fresh
+            score += 5  # masih sangat fresh
         elif days <= 5:
             score += 10
         elif days <= 10:
             score += 20
         else:
-            score += 30     # sudah cukup lama → risiko kualitas naik
+            score += 30  # sudah cukup lama -> risiko kualitas naik
     else:
-        # tidak ada tanggal panen → tambahkan sedikit risiko ketidakpastian
+        # tidak ada tanggal panen -> tambahkan sedikit risiko ketidakpastian
         score += 10
 
     # === 2. Volume lot (kg) ===
     if getattr(lot, "volume_kg", None):
         if lot.volume_kg > 5000:
-            score += 15   # volume besar, dampak ekonominya besar
+            score += 15  # volume besar, dampak ekonominya besar
         elif lot.volume_kg > 1000:
             score += 10
         else:
@@ -67,18 +122,28 @@ def calculate_lot_risk(lot: Lot):
     labtests = LabTest.objects.filter(sampling__lot=lot)
 
     if not labtests.exists():
-        # belum ada hasil lab → agak berisiko
-        score += 20
+        score += 20  # belum ada hasil lab -> agak berisiko
     else:
-        fail_count = labtests.filter(result__iexact="FAIL").count()
-        score += fail_count * 25  # tiap gagal uji nambah 25
+        # evaluasi berdasarkan batas standar
+        for test in labtests:
+            violated, delta, _ = evaluate_lab_test(test)
+            if violated:
+                score += delta
+                if delta >= 60:  # pelanggaran kritis (mikroba berbahaya / antibiotik terlarang)
+                    critical_violation = True
+
+        # fallback: uji yang belum dipetakan tetap lihat kolom result
+        unmapped_fail = (
+            labtests.exclude(parameter__in=STANDARD_LIMITS.keys())
+            .filter(result__iexact="FAIL")
+            .count()
+        )
+        score += unmapped_fail * 20
 
     # === 4. Insiden keamanan pangan ===
-    # insiden aktif untuk lot ini
     if Incident.objects.filter(lot=lot).exclude(status__iexact="closed").exists():
         score += 30
 
-    # insiden lain di farm yang sama
     if lot.farm and Incident.objects.filter(lot__farm=lot.farm).exists():
         score += 10
 
@@ -90,7 +155,6 @@ def calculate_lot_risk(lot: Lot):
             .first()
         )
         if last_log:
-            # contoh rule: pH & salinitas di luar rentang normal
             if last_log.ph is not None and (last_log.ph < 7 or last_log.ph > 8.5):
                 score += 10
             if (
@@ -99,10 +163,12 @@ def calculate_lot_risk(lot: Lot):
             ):
                 score += 10
 
-    # clamp 0–100
+    # clamp 0-100
+    if critical_violation:
+        score = max(score, 90)
+
     score = max(0, min(score, 100))
 
-    # === 6. Risk level & status dari score ===
     if score >= 70:
         risk_level = "HIGH"
         status = "INVESTIGATE"
@@ -115,6 +181,7 @@ def calculate_lot_risk(lot: Lot):
 
     return score, risk_level, status
 
+
 def explain_lot_risk(lot: Lot):
     """
     Versi explainable dari calculate_lot_risk:
@@ -123,6 +190,7 @@ def explain_lot_risk(lot: Lot):
 
     reasons = []
     score = 0
+    critical_violation = False
 
     # === 0. Reputasi farm ===
     if lot.farm:
@@ -147,7 +215,6 @@ def explain_lot_risk(lot: Lot):
 
     # === 1. Umur lot ===
     if lot.harvest_date:
-        from django.utils import timezone
         today = timezone.now().date()
         days = (today - lot.harvest_date).days
 
@@ -184,7 +251,7 @@ def explain_lot_risk(lot: Lot):
             score += delta
         else:
             delta = 5
-            reasons.append(f"Volume kecil–sedang ({lot.volume_kg} kg) (+{delta})")
+            reasons.append(f"Volume kecil-sedang ({lot.volume_kg} kg) (+{delta})")
             score += delta
 
     # === 3. Hasil lab ===
@@ -194,13 +261,23 @@ def explain_lot_risk(lot: Lot):
         reasons.append(f"Belum ada hasil lab untuk lot ini (+{delta})")
         score += delta
     else:
-        fail_count = labtests.filter(result__iexact="FAIL").count()
-        if fail_count:
-            delta = fail_count * 25
-            reasons.append(f"{fail_count} parameter uji lab dinyatakan FAIL (+{delta})")
+        for test in labtests:
+            violated, delta, message = evaluate_lab_test(test)
+            reasons.append(message or f"Hasil {test.parameter}: {test.result or '-'}")
+            if violated:
+                score += delta
+                if delta >= 60:
+                    critical_violation = True
+
+        unmapped_fail = (
+            labtests.exclude(parameter__in=STANDARD_LIMITS.keys())
+            .filter(result__iexact="FAIL")
+            .count()
+        )
+        if unmapped_fail:
+            delta = unmapped_fail * 20
+            reasons.append(f"{unmapped_fail} parameter uji (tanpa standar) dinyatakan FAIL (+{delta})")
             score += delta
-        else:
-            reasons.append("Semua hasil lab PASS (+0)")
 
     # === 4. Insiden ===
     if Incident.objects.filter(lot=lot).exclude(status__iexact="closed").exists():
@@ -234,6 +311,10 @@ def explain_lot_risk(lot: Lot):
                 score += delta
 
     # clamp + mapping level & status (sama seperti calculate_lot_risk)
+    if critical_violation:
+        reasons.append("Pelanggaran kritis terhadap standar (mikroba/antibiotik), otomatis INVESTIGATE")
+        score = max(score, 90)
+
     score = max(0, min(score, 100))
 
     if score >= 70:
